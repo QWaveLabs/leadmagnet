@@ -3,7 +3,7 @@
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
 
-type Language = "es" | "en"
+type Language = "en" | "es"
 
 interface LanguageContextType {
   language: Language
@@ -134,7 +134,7 @@ const translations = {
 }
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<Language>("es")
+  const [language, setLanguageState] = useState<Language>("en")
   const [isLoaded, setIsLoaded] = useState(false)
 
   // Cargar el idioma desde localStorage al iniciar
