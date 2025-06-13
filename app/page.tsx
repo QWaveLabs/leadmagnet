@@ -9,9 +9,9 @@ import CalendlyModal from "@/components/calendly-modal"
 import BackgroundEffects from "@/components/background-effects"
 import LanguageSwitcher from "@/components/language-switcher"
 
-// URL real del webhook
-const WEBHOOK_URL = "https://hook.us2.make.com/i3487uilk3skgcny1onpzhod8wenx159"
-const WEBHOOK_2_URL = "https://hook.us2.make.com/zcoxuxdkd6la3nga80duojy71dgrh5tt"
+// Webhook URLs from environment variables
+const WEBHOOK_1_URL = process.env.NEXT_PUBLIC_WEBHOOK_1_URL!
+const WEBHOOK_2_URL = process.env.NEXT_PUBLIC_WEBHOOK_2_URL!
 
 // Claves para localStorage
 const STORAGE_KEYS = {
@@ -35,31 +35,24 @@ export default function HomePage() {
   useEffect(() => {
     const loadFromStorage = () => {
       try {
-        // Cargar paso actual
         const savedStep = localStorage.getItem(STORAGE_KEYS.CURRENT_STEP)
         if (savedStep && ["quiz", "results-form", "confirmation"].includes(savedStep)) {
           setCurrentStep(savedStep as "quiz" | "results-form" | "confirmation")
         }
-
-        // Cargar respuestas del quiz
         const savedAnswers = localStorage.getItem(STORAGE_KEYS.QUIZ_ANSWERS)
         if (savedAnswers) {
           setQuizAnswers(JSON.parse(savedAnswers))
         }
-
-        // Cargar resultados del quiz
         const savedResults = localStorage.getItem(STORAGE_KEYS.QUIZ_RESULTS)
         if (savedResults) {
           setQuizResults(JSON.parse(savedResults))
         }
       } catch (error) {
         console.error("Error al cargar datos del localStorage:", error)
-        // En caso de error, limpiar localStorage y empezar de nuevo
         clearStorage()
       }
       setIsLoading(false)
     }
-
     loadFromStorage()
   }, [])
 
@@ -101,94 +94,56 @@ export default function HomePage() {
   }, [quizResults, isLoading])
 
   const handleQuizComplete = async (answers: Record<string, string>) => {
-    // Guardar respuestas
     setQuizAnswers(answers)
-
     try {
-      // Realizar la llamada real al webhook
       console.log("Enviando respuestas al webhook:", answers)
-
-      const response = await fetch(WEBHOOK_URL, {
+      const response = await fetch(WEBHOOK_1_URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ answers }),
       })
-
       if (!response.ok) {
         throw new Error("Error al procesar las respuestas")
       }
-
-      // Procesar la respuesta del webhook
       const data = await response.json()
-
       console.log("Respuesta del webhook:", data)
-
-      // Usar los datos reales de la respuesta
       const results = {
-        score: data.score || calculateSimulatedScore(answers), // Usar simulación como fallback
-        reportHTML: data.reportHTML || generateSimulatedReport(answers, data.score || 0),
+        score: data.score ?? calculateSimulatedScore(answers),
+        reportHTML: data.reportHTML ?? generateSimulatedReport(answers, data.score ?? 0),
       }
-
       setQuizResults(results)
-
-      // Avanzar a la pantalla de resultados + formulario
       setCurrentStep("results-form")
     } catch (error) {
       console.error("Error al enviar respuestas:", error)
-
-      // En caso de error, usar datos simulados como fallback
       const simulatedScore = calculateSimulatedScore(answers)
       const simulatedReportHTML = generateSimulatedReport(answers, simulatedScore)
-
-      const results = {
-        score: simulatedScore,
-        reportHTML: simulatedReportHTML,
-      }
-
-      setQuizResults(results)
-
-      // Avanzar a la pantalla de resultados + formulario de todos modos
+      setQuizResults({ score: simulatedScore, reportHTML: simulatedReportHTML })
       setCurrentStep("results-form")
     }
   }
 
   const handleFormSubmit = async (leadData: any) => {
-    // Guardar datos del formulario en localStorage
     saveToStorage(STORAGE_KEYS.FORM_DATA, leadData)
-
     try {
-      // Enviar datos al webhook 2 real
       console.log("Enviando datos al webhook 2:", {
         leadInfo: leadData,
         score: quizResults?.score || 0,
         reportHTML: quizResults?.reportHTML || "",
       })
-
       const response = await fetch(WEBHOOK_2_URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           leadInfo: leadData,
           score: quizResults?.score || 0,
           reportHTML: quizResults?.reportHTML || "",
         }),
       })
-
-      if (!response.ok) {
-        throw new Error("Error al procesar el formulario")
-      }
-
+      if (!response.ok) throw new Error("Error al procesar el formulario")
       console.log("Respuesta del webhook 2:", await response.json())
-
-      // Avanzar a la pantalla de confirmación
       setCurrentStep("confirmation")
     } catch (error) {
       console.error("Error al enviar formulario:", error)
-      // En caso de error, avanzar de todos modos para no bloquear al usuario
       setCurrentStep("confirmation")
     }
   }
@@ -200,34 +155,18 @@ export default function HomePage() {
     setQuizResults(null)
   }
 
-  // Funciones auxiliares para generar respuestas simuladas
+  // Funciones auxiliares
   const calculateSimulatedScore = (answers: Record<string, string>): number => {
-    // Algoritmo simple: contar cuántas respuestas contienen palabras clave positivas
     const positiveKeywords = [
-      "Avanzado",
-      "Experto",
-      "Crítica",
-      "Data-driven",
-      "Automatización",
-      "Microservicios",
-      "Nube",
-      "Testing continuo",
-      "Agile",
-      "Backups automáticos",
+      "Avanzado", "Experto", "Crítica", "Data-driven",
+      "Automatización", "Microservicios", "Nube",
+      "Testing continuo", "Agile", "Backups automáticos",
     ]
-
-    let score = 50 // Puntuación base
-
-    // Analizar cada respuesta
+    let score = 50
     Object.values(answers).forEach((answer) => {
-      // Sumar puntos por palabras clave positivas
       positiveKeywords.forEach((keyword) => {
-        if (answer.includes(keyword)) {
-          score += 2
-        }
+        if (answer.includes(keyword)) score += 2
       })
-
-      // Restar puntos por respuestas que indican menor madurez
       if (
         answer.includes("Principiante") ||
         answer.includes("No tenemos") ||
@@ -237,19 +176,14 @@ export default function HomePage() {
         score -= 3
       }
     })
-
-    // Asegurar que el score esté entre 0 y 100
     return Math.min(Math.max(score, 0), 100)
   }
 
   const generateSimulatedReport = (answers: Record<string, string>, score: number): string => {
-    // Generar un informe HTML basado en el score y algunas respuestas clave
+    const strengths: string[] = []
+    const weaknesses: string[] = []
+    const recommendations: string[] = []
 
-    const strengths = []
-    const weaknesses = []
-    const recommendations = []
-
-    // Analizar respuestas para determinar fortalezas y debilidades
     if (answers.q1?.includes("Automatización")) {
       strengths.push("Enfoque en automatización de procesos")
       recommendations.push("Implementar herramientas de RPA (Robotic Process Automation) para tareas repetitivas")
@@ -282,8 +216,7 @@ export default function HomePage() {
       recommendations.push("Realizar un audit de seguridad completo y establecer políticas de protección de datos")
     }
 
-    // Generar HTML basado en el análisis
-    const reportHTML = `
+    return `
       <h4 class="text-xl font-bold mb-4 text-[#FF4D00]">Resumen Ejecutivo</h4>
       <p class="mb-6">Basado en tus respuestas, tu organización muestra un nivel de madurez tecnológica ${
         score < 30 ? "inicial" : score < 60 ? "en desarrollo" : score < 80 ? "avanzado" : "excepcional"
@@ -292,31 +225,25 @@ export default function HomePage() {
           ? "Hay oportunidades significativas para mejorar y optimizar tu infraestructura tecnológica."
           : "Tu enfoque tecnológico está bien alineado con las mejores prácticas de la industria."
       }</p>
-      
       <h4 class="text-lg font-bold mb-3 text-white">Fortalezas Identificadas</h4>
       <ul class="list-disc pl-5 mb-6 space-y-2">
-      ${strengths.map((strength) => `<li>${strength}</li>`).join("")}
-      ${strengths.length === 0 ? "<li>Disposición para evaluar y mejorar la infraestructura tecnológica</li>" : ""}
+        ${strengths.map((str) => `<li>${str}</li>`).join("")}
+        ${strengths.length === 0 ? "<li>Disposición para evaluar y mejorar la infraestructura tecnológica</li>" : ""}
       </ul>
-      
       <h4 class="text-lg font-bold mb-3 text-white">Áreas de Mejora</h4>
       <ul class="list-disc pl-5 mb-6 space-y-2">
-      ${weaknesses.map((weakness) => `<li>${weakness}</li>`).join("")}
-      ${weaknesses.length === 0 ? "<li>Mantener el ritmo de innovación frente a nuevas tecnologías emergentes</li>" : ""}
+        ${weaknesses.map((wk) => `<li>${wk}</li>`).join("")}
+        ${weaknesses.length === 0 ? "<li>Mantener el ritmo de innovación frente a nuevas tecnologías emergentes</li>" : ""}
       </ul>
-      
       <h4 class="text-lg font-bold mb-3 text-[#FF4D00]">Recomendaciones Estratégicas</h4>
       <ul class="list-disc pl-5 mb-4 space-y-2">
-      ${recommendations.map((rec) => `<li>${rec}</li>`).join("")}
-      <li>Establecer un roadmap tecnológico claro con objetivos a corto, mediano y largo plazo</li>
-      <li>Invertir en capacitación continua del equipo en tecnologías emergentes</li>
+        ${recommendations.map((rec) => `<li>${rec}</li>`).join("")}
+        <li>Establecer un roadmap tecnológico claro con objetivos a corto, mediano y largo plazo</li>
+        <li>Invertir en capacitación continua del equipo en tecnologías emergentes</li>
       </ul>
-      `
-
-    return reportHTML
+    `
   }
 
-  // Mostrar loader mientras se cargan los datos del localStorage
   if (isLoading) {
     return (
       <div className="min-h-screen bg-black text-white relative overflow-hidden flex items-center justify-center">
@@ -324,7 +251,7 @@ export default function HomePage() {
         <div className="relative z-10">
           <motion.div
             animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
             className="inline-block mb-6"
           >
             <div className="w-16 h-16 border-4 border-[#FF4D00] border-t-transparent rounded-full animate-spin" />
@@ -339,7 +266,6 @@ export default function HomePage() {
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
       <BackgroundEffects />
       <LanguageSwitcher />
-
       <div className="relative z-10">
         <AnimatePresence mode="wait">
           {currentStep === "quiz" && (
@@ -353,7 +279,6 @@ export default function HomePage() {
               <QuizComponent onComplete={handleQuizComplete} savedAnswers={quizAnswers} onReset={handleResetQuiz} />
             </motion.div>
           )}
-
           {currentStep === "results-form" && (
             <motion.div
               key="results-form"
@@ -370,7 +295,6 @@ export default function HomePage() {
               />
             </motion.div>
           )}
-
           {currentStep === "confirmation" && (
             <motion.div
               key="confirmation"
@@ -384,7 +308,6 @@ export default function HomePage() {
           )}
         </AnimatePresence>
       </div>
-
       <CalendlyModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   )
