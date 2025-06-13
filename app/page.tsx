@@ -24,6 +24,7 @@ const STORAGE_KEYS = {
 export default function HomePage() {
   const [currentStep, setCurrentStep] = useState<"quiz" | "results-form" | "confirmation">("quiz")
   const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({})
+  const [isFirstQuestion, setIsFirstQuestion] = useState(true) // Añade este estado
   const [quizResults, setQuizResults] = useState<{
     score: number
     reportHTML: string
@@ -265,7 +266,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
       <BackgroundEffects />
-      <LanguageSwitcher />
+      {isFirstQuestion && <LanguageSwitcher />} 
       <div className="relative z-10">
         <AnimatePresence mode="wait">
           {currentStep === "quiz" && (
@@ -276,7 +277,12 @@ export default function HomePage() {
               exit={{ opacity: 0, x: -100 }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
             >
-              <QuizComponent onComplete={handleQuizComplete} savedAnswers={quizAnswers} onReset={handleResetQuiz} />
+              <QuizComponent 
+                onComplete={handleQuizComplete} 
+                savedAnswers={quizAnswers} 
+                onReset={handleResetQuiz}
+                onQuestionChange={(isFirst: boolean) => setIsFirstQuestion(isFirst)} // Añade esta prop
+              />
             </motion.div>
           )}
           {currentStep === "results-form" && (

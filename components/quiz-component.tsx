@@ -11,8 +11,9 @@ import { useLanguage } from "@/contexts/language-context"
 
 interface QuizComponentProps {
   onComplete: (answers: Record<string, string>) => void
-  savedAnswers?: Record<string, string>
-  onReset?: () => void
+  savedAnswers: Record<string, string>
+  onReset: () => void
+  onQuestionChange: (isFirst: boolean) => void
 }
 
 const questions = [
@@ -428,7 +429,7 @@ const questions = [
   },
 ]
 
-export default function QuizComponent({ onComplete, savedAnswers = {}, onReset }: QuizComponentProps) {
+export default function QuizComponent({ onComplete, savedAnswers = {}, onReset, onQuestionChange }: QuizComponentProps) {
   const { t, language } = useLanguage()
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string>>(savedAnswers)
@@ -448,6 +449,11 @@ export default function QuizComponent({ onComplete, savedAnswers = {}, onReset }
       }
     }
   }, [savedAnswers])
+
+  // Notificar cambio de pregunta
+  useEffect(() => {
+    onQuestionChange(currentQuestion === 0)
+  }, [currentQuestion, onQuestionChange])
 
   const handleAnswer = (value: string) => {
     setAnswers((prev) => ({
