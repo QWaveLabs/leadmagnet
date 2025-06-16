@@ -134,9 +134,6 @@ const ConfirmationDisplay: React.FC<ConfirmationDisplayProps> = ({ onOpenModal, 
           </Card>
         </motion.div>
 
-        <div   className="prose prose-invert max-w-none"
-              dangerouslySetInnerHTML={{ __html: reportHTML }} />
-
         <div className="actions">
           <button onClick={onOpenModal} className="btn-primary">
             {t("confirmation.cta.button")}
