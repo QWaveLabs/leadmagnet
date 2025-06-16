@@ -5,13 +5,15 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Calendar, CheckCircle, Mail, Clock, RotateCcw } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
+import React from "react"
 
 interface ConfirmationDisplayProps {
   onOpenModal: () => void
-  onReset?: () => void
+  onReset: () => void
+  reportHTML: string
 }
 
-export default function ConfirmationDisplay({ onOpenModal, onReset }: ConfirmationDisplayProps) {
+const ConfirmationDisplay: React.FC<ConfirmationDisplayProps> = ({ onOpenModal, onReset, reportHTML }) => {
   const { t } = useLanguage()
 
   return (
@@ -131,7 +133,21 @@ export default function ConfirmationDisplay({ onOpenModal, onReset }: Confirmati
             </motion.div>
           </Card>
         </motion.div>
+
+        <div   className="prose prose-invert max-w-none"
+              dangerouslySetInnerHTML={{ __html: reportHTML }} />
+
+        <div className="actions">
+          <button onClick={onOpenModal} className="btn-primary">
+            {t("confirmation.cta.button")}
+          </button>
+          <button onClick={onReset} className="btn-secondary">
+            {t("confirmation.reset")}
+          </button>
+        </div>
       </div>
     </div>
   )
 }
+
+export default ConfirmationDisplay

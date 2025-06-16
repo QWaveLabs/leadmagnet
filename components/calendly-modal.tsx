@@ -54,7 +54,7 @@ export default function CalendlyModal({ isOpen, onClose }: CalendlyModalProps) {
             {/* Iframe Container */}
             <div className="w-full h-full">
               <iframe
-                src="https://calendly.com/demo/30min"
+                src="https://qwavelabs.io/consultation"
                 width="100%"
                 height="100%"
                 frameBorder="0"

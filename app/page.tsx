@@ -141,7 +141,12 @@ export default function HomePage() {
         }),
       })
       if (!response.ok) throw new Error("Error al procesar el formulario")
-      console.log("Respuesta del webhook 2:", await response.json())
+      const data = await response.json()
+      console.log("Respuesta del webhook 2:", data)
+      setQuizResults({
+        score: data.score,
+        reportHTML: data.reportHTML,
+      })
       setCurrentStep("confirmation")
     } catch (error) {
       console.error("Error al enviar formulario:", error)
@@ -309,7 +314,11 @@ export default function HomePage() {
               exit={{ opacity: 0, x: -100 }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
             >
-              <ConfirmationDisplay onOpenModal={() => setIsModalOpen(true)} onReset={handleResetQuiz} />
+              <ConfirmationDisplay 
+                onOpenModal={() => setIsModalOpen(true)} 
+                onReset={handleResetQuiz} 
+                reportHTML={quizResults?.reportHTML || ""}
+              />
             </motion.div>
           )}
         </AnimatePresence>
