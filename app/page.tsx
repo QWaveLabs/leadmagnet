@@ -103,19 +103,39 @@ export default function HomePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ answers }),
       })
-      if (!response.ok) {
-        throw new Error("Error al procesar las respuestas")
+
+      // Primero obtener el texto de la respuesta
+      const responseText = await response.text()
+      
+      // Intentar parsear el texto después de sanitizarlo
+      let data
+      try {
+        // Eliminar caracteres de control y espacios en blanco innecesarios
+        const sanitizedText = responseText
+          .replace(/[\x00-\x1F\x7F-\x9F]/g, '')
+          .trim()
+      
+        data = JSON.parse(sanitizedText)
+        console.log("Respuesta del webhook (parseada):", data)
+      } catch (parseError) {
+        console.error("Error al parsear JSON:", parseError)
+        console.log("Respuesta raw:", responseText)
+        throw new Error("Error al procesar la respuesta del servidor")
       }
-      const data = await response.json()
-      console.log("Respuesta del webhook:", data)
+
+      if (!response.ok) {
+        throw new Error(`Error HTTP: ${response.status}`)
+      }
+
       const results = {
-        score: data.score ?? calculateSimulatedScore(answers),
-        reportHTML: data.reportHTML ?? generateSimulatedReport(answers, data.score ?? 0),
+        score: data.score || 0,
+        reportHTML: data.reportHTML || "",
       }
       setQuizResults(results)
       setCurrentStep("results-form")
     } catch (error) {
       console.error("Error al enviar respuestas:", error)
+      // Fallback a simulación en caso de error
       const simulatedScore = calculateSimulatedScore(answers)
       const simulatedReportHTML = generateSimulatedReport(answers, simulatedScore)
       setQuizResults({ score: simulatedScore, reportHTML: simulatedReportHTML })
