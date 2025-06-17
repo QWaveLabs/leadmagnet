@@ -11,7 +11,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "Tech Assessment - Análisis Tecnológico Personalizado",
+  title: "AI Readiness Assesment - Análisis Tecnológico Personalizado",
   description: "Descubre la solución tecnológica perfecta para tu empresa con nuestro assessment inteligente",
   generator: "v0.dev",
 }

@@ -9,8 +9,9 @@ import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { User, Mail, Phone, Send, Award, Sparkles, CheckCircle, RotateCcw } from "lucide-react"
+import { User, Mail, Phone, Send, Award, Sparkles, CheckCircle, RotateCcw, Calendar } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
+import CalendlyModal from "./calendly-modal"
 
 interface ResultsAndFormProps {
   score: number
@@ -28,6 +29,10 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset }:
     email: "",
     acceptTerms: false,
   })
+  
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const onOpenModal = () => setIsModalOpen(true)
 
   // Cargar datos del formulario desde localStorage
   useEffect(() => {
@@ -102,16 +107,17 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset }:
               </Button>
             </motion.div>
           )}
+          
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols gap-8">
           {/* Results Section */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <Card className="bg-gray-900/50 border-gray-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm h-full">
+            <Card className="bg-gray-900/50 border-gray-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm h-full min-h-[700px]">
               {/* Score Display */}
               <div className="flex flex-col items-center mb-6 p-4 bg-gradient-to-r from-gray-900 to-gray-800 rounded-xl">
                 <div className="relative mb-4">
@@ -136,7 +142,7 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset }:
               </div>
 
               {/* Report HTML */}
-              <div className="max-h-96 overflow-y-auto">
+              <div className="max-h-96 overflow-y-auto min-h-[700px]">
                 <h3 className="text-lg font-bold mb-4 flex items-center">
                   <CheckCircle className="w-5 h-5 text-[#FF4D00] mr-2" />
                   {t("results.analysis")}
@@ -151,6 +157,18 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset }:
               </div>
             </Card>
           </motion.div>
+
+                  <div className="text-center">
+                  <Button
+                    onClick={onOpenModal}
+                    className="bg-gradient-to-r from-[#FF4D00] to-[#FF6F3C] hover:from-[#FF6F3C] hover:to-[#FF4D00] text-white font-bold text-lg px-8 py-3 rounded-xl transition-all duration-300 transform hover:scale-105"
+                  >
+                    <Calendar className="w-5 h-5 mr-3" />
+                    {t("confirmation.cta.button")}
+                  </Button>
+                   <h2 className="text-2xl font-bold mt-2">{t("form.separation")}</h2>
+                </div>
+          
 
           {/* Form Section */}
           <motion.div

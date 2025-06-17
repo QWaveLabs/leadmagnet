@@ -306,7 +306,7 @@ export default function HomePage() {
           >
             <div className="w-16 h-16 border-4 border-[#FF4D00] border-t-transparent rounded-full animate-spin" />
           </motion.div>
-          <p className="text-xl text-gray-400 text-center">Cargando...</p>
+          <p className="text-xl text-gray-400 text-center">Loading...</p>
         </div>
       </div>
     )
@@ -318,6 +318,7 @@ export default function HomePage() {
       {isFirstQuestion && <LanguageSwitcher />} 
       <div className="relative z-10">
         <AnimatePresence mode="wait">
+          
           {currentStep === "quiz" && (
             <motion.div
               key="quiz"
@@ -334,6 +335,8 @@ export default function HomePage() {
               />
             </motion.div>
           )}
+
+
           {currentStep === "results-form" && (
             <motion.div
               key="results-form"

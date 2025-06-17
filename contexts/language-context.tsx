@@ -17,7 +17,7 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 const translations = {
   es: {
     // Quiz Component
-    "quiz.title": "TECH ASSESSMENT",
+    "quiz.title": "AI Readiness Assesment",
     "quiz.subtitle": "Descubre la solución perfecta para tu empresa",
     "quiz.reset": "Empezar de nuevo",
     "quiz.question": "Pregunta",
@@ -26,10 +26,10 @@ const translations = {
     "quiz.next": "Siguiente",
     "quiz.seeResult": "Ver mi resultado",
     "quiz.processing": "Procesando tus respuestas...",
-    "quiz.analyzing": "Estamos analizando tu perfil tecnológico",
+    "quiz.analyzing": "Estamos analizando tu nivel de preparación para IA",
 
     // Results and Form
-    "results.title": "TU ANÁLISIS",
+    "results.title": "TU PUNTUACIÓN DE PREPARACIÓN PARA IA",
     "results.subtitle": "Revisa tus resultados y completa tus datos para recibir el reporte completo",
     "results.reset": "Empezar de nuevo",
     "results.score": "Tu Puntuación Tecnológica",
@@ -50,6 +50,7 @@ const translations = {
     "form.terms":
       "Acepto los Términos y Condiciones y autorizo el tratamiento de mis datos personales para recibir información comercial.",
     "form.submit": "OBTENER REPORTE COMPLETO",
+    "form.separation": "O",
 
     // Confirmation
     "confirmation.title": "¡PERFECTO!",
@@ -57,7 +58,7 @@ const translations = {
     "confirmation.reset": "Realizar nuevo análisis",
     "confirmation.completed": "Análisis Completado",
     "confirmation.message":
-      "Hemos procesado tu evaluación tecnológica y enviado el reporte detallado a tu email. Nuestro equipo de expertos revisará tu perfil y te contactará con recomendaciones personalizadas.",
+      "Hemos procesado tu puntaje de preparacion para la IA y enviado el reporte detallado a tu email. Nuestro equipo de expertos revisará tu perfil y te contactará con recomendaciones personalizadas.",
     "confirmation.processed": "Análisis Procesado",
     "confirmation.processed.desc": "Tu evaluación tecnológica ha sido completada",
     "confirmation.sent": "Reporte Enviado",
@@ -75,7 +76,7 @@ const translations = {
   },
   en: {
     // Quiz Component
-    "quiz.title": "TECH ASSESSMENT",
+    "quiz.title": "AI Readiness Assesment",
     "quiz.subtitle": "Discover the perfect solution for your company",
     "quiz.reset": "Start over",
     "quiz.question": "Question",
@@ -84,10 +85,10 @@ const translations = {
     "quiz.next": "Next",
     "quiz.seeResult": "See my result",
     "quiz.processing": "Processing your answers...",
-    "quiz.analyzing": "We are analyzing your technology profile",
+    "quiz.analyzing": "We are analyzing your AI Readiness Score",
 
     // Results and Form
-    "results.title": "YOUR ANALYSIS",
+    "results.title": " YOUR AI READINESS SCORE",
     "results.subtitle": "Review your results and complete your information to receive the full report",
     "results.reset": "Start over",
     "results.score": "Your Technology Score",
@@ -108,6 +109,8 @@ const translations = {
     "form.terms":
       "I accept the Terms and Conditions and authorize the processing of my personal data to receive commercial information.",
     "form.submit": "GET COMPLETE REPORT",
+    "form.separation": "OR",
+
 
     // Confirmation
     "confirmation.title": "PERFECT!",
@@ -115,7 +118,7 @@ const translations = {
     "confirmation.reset": "Take a new assessment",
     "confirmation.completed": "Analysis Completed",
     "confirmation.message":
-      "We have processed your technology assessment and sent the detailed report to your email. Our team of experts will review your profile and contact you with personalized recommendations.",
+      "We have processed your AI Readiness Score and sent the detailed report to your email. Our team of experts will review your profile and contact you with personalized recommendations.",
     "confirmation.processed": "Analysis Processed",
     "confirmation.processed.desc": "Your technology assessment has been completed",
     "confirmation.sent": "Report Sent",
@@ -125,7 +128,7 @@ const translations = {
     "confirmation.cta.title": "Want to speed up the process?",
     "confirmation.cta.desc":
       "Schedule a free strategic consultation with our experts to discuss your technology roadmap immediately.",
-    "confirmation.cta.button": "SCHEDULE FREE CONSULTATION",
+    "confirmation.cta.button": "SCHEDULE A FREE CONSULTATION",
     "confirmation.cta.footer": "30-minute consultation • No commitment • Personalized analysis",
 
     // Language Switcher

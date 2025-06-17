@@ -1,7 +1,7 @@
 const translations = {
   es: {
     // Quiz Component
-    "quiz.title": "TECH ASSESSMENT",
+    "quiz.title": "AI Readiness Assesment",
     "quiz.subtitle": "Descubre la solución perfecta para tu empresa",
     "quiz.reset": "Empezar de nuevo",
     "quiz.question": "Pregunta",
@@ -59,7 +59,7 @@ const translations = {
   },
   en: {
     // Quiz Component
-    "quiz.title": "TECH ASSESSMENT",
+    "quiz.title": "AI Readiness Assesment",
     "quiz.subtitle": "Discover the perfect solution for your company",
     "quiz.reset": "Start over",
     "quiz.question": "Question",
@@ -99,7 +99,7 @@ const translations = {
     "confirmation.reset": "Take a new assessment",
     "confirmation.completed": "Analysis Completed",
     "confirmation.message":
-      "We have processed your technology assessment and sent the detailed report to your email. Our team of experts will review your profile and contact you with personalized recommendations.",
+      "We have processed your AI Readiness Score and sent the detailed report to your email. Our team of experts will review your profile and contact you with personalized recommendations.",
     "confirmation.processed": "Analysis Processed",
     "confirmation.processed.desc": "Your technology assessment has been completed",
     "confirmation.sent": "Report Sent",
@@ -109,7 +109,7 @@ const translations = {
     "confirmation.cta.title": "Want to speed up the process?",
     "confirmation.cta.desc":
       "Schedule a free strategic consultation with our experts to discuss your technology roadmap immediately.",
-    "confirmation.cta.button": "SCHEDULE FREE CONSULTATION",
+    "confirmation.cta.button": "SCHEDULE A FREE CONSULTATION",
     "confirmation.cta.footer": "30-minute consultation • No commitment • Personalized analysis",
 
     // Language Switcher

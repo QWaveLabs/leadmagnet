@@ -134,15 +134,7 @@ const ConfirmationDisplay: React.FC<ConfirmationDisplayProps> = ({ onOpenModal, 
           </Card>
         </motion.div>
 
-        <div className="actions">
-          <button onClick={onOpenModal} className="btn-primary">
-            {t("confirmation.cta.button")}
-          </button>
-          <button onClick={onReset} className="btn-secondary">
-            {t("confirmation.reset")}
-          </button>
-        </div>
-      </div>
+          </div>
     </div>
   )
 }
