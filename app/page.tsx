@@ -104,38 +104,62 @@ export default function HomePage() {
         body: JSON.stringify({ answers }),
       })
 
-      // Primero obtener el texto de la respuesta
-      const responseText = await response.text()
-      
-      // Intentar parsear el texto después de sanitizarlo
-      let data
-      try {
-        // Eliminar caracteres de control y espacios en blanco innecesarios
-        const sanitizedText = responseText
-          .replace(/[\x00-\x1F\x7F-\x9F]/g, '')
-          .trim()
-      
-        data = JSON.parse(sanitizedText)
-        console.log("Respuesta del webhook (parseada):", data)
-      } catch (parseError) {
-        console.error("Error al parsear JSON:", parseError)
-        console.log("Respuesta raw:", responseText)
-        throw new Error("Error al procesar la respuesta del servidor")
-      }
-
       if (!response.ok) {
         throw new Error(`Error HTTP: ${response.status}`)
       }
 
-      const results = {
-        score: data.score || 0,
-        reportHTML: data.reportHTML || "",
+      // Get response as text
+      const responseText = await response.text()
+      
+      try {
+        // Try to parse the JSON directly first
+        const data = JSON.parse(responseText)
+        console.log("Respuesta del webhook (parseada):", data)
+        
+        setQuizResults({
+          score: data.score || 0,
+          reportHTML: data.reportHTML || ""
+        })
+        setCurrentStep("results-form")
+      } catch (parseError) {
+        console.error("Error al parsear JSON:", parseError)
+        
+        // If parsing fails, try to clean the response
+        try {
+          // Remove newlines and properly escape quotes
+          const cleanedResponse = responseText
+            .replace(/\n/g, '')
+            .replace(/\r/g, '')
+            .replace(/\\/g, '\\\\')
+            .replace(/\\"/g, '\\"')
+          
+          const data = JSON.parse(cleanedResponse)
+          
+          setQuizResults({
+            score: data.score || 0,
+            reportHTML: data.reportHTML || ""
+          })
+          setCurrentStep("results-form")
+        } catch (secondError) {
+          console.error("Error en segundo intento de parsing:", secondError)
+          // Use regex as last resort
+          const scoreMatch = responseText.match(/"score":\s*(\d+)/)
+          const reportMatch = responseText.match(/"reportHTML":\s*"([\s\S]+?)(?="\n})/)
+          
+          if (scoreMatch && reportMatch) {
+            setQuizResults({
+              score: parseInt(scoreMatch[1]),
+              reportHTML: reportMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"')
+            })
+            setCurrentStep("results-form")
+          } else {
+            throw new Error("No se pudo extraer la información necesaria")
+          }
+        }
       }
-      setQuizResults(results)
-      setCurrentStep("results-form")
     } catch (error) {
       console.error("Error al enviar respuestas:", error)
-      // Fallback a simulación en caso de error
+      // Fallback to simulation
       const simulatedScore = calculateSimulatedScore(answers)
       const simulatedReportHTML = generateSimulatedReport(answers, simulatedScore)
       setQuizResults({ score: simulatedScore, reportHTML: simulatedReportHTML })
