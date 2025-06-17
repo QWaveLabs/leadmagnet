@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 import { ChevronRight, ChevronLeft, Loader2, RotateCcw } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
 
@@ -429,28 +430,30 @@ const questions = [
   },
 ]
 
-export default function QuizComponent({ onComplete, savedAnswers = {}, onReset, onQuestionChange }: QuizComponentProps) {
+export default function QuizComponent({
+  onComplete,
+  savedAnswers = {},
+  onReset,
+  onQuestionChange,
+}: QuizComponentProps) {
   const { t, language } = useLanguage()
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string>>(savedAnswers)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Cargar respuestas guardadas y determinar la pregunta actual
+  const current = questions[currentQuestion]
+  const isMultiSelect = current.id === "q11"
+
   useEffect(() => {
     if (Object.keys(savedAnswers).length > 0) {
       setAnswers(savedAnswers)
-
-      // Encontrar la primera pregunta sin responder o ir a la última respondida
       const answeredQuestions = Object.keys(savedAnswers).length
-      if (answeredQuestions < questions.length) {
-        setCurrentQuestion(answeredQuestions)
-      } else {
-        setCurrentQuestion(questions.length - 1)
-      }
+      setCurrentQuestion(
+        answeredQuestions < questions.length ? answeredQuestions : questions.length - 1
+      )
     }
   }, [savedAnswers])
 
-  // Notificar cambio de pregunta
   useEffect(() => {
     onQuestionChange(currentQuestion === 0)
   }, [currentQuestion, onQuestionChange])
@@ -458,7 +461,18 @@ export default function QuizComponent({ onComplete, savedAnswers = {}, onReset, 
   const handleAnswer = (value: string) => {
     setAnswers((prev) => ({
       ...prev,
-      [questions[currentQuestion].id]: value,
+      [current.id]: value,
+    }))
+  }
+
+  const toggleMultiSelectOption = (option: string) => {
+    const prev = answers[current.id] ? answers[current.id].split("||") : []
+    const updated = prev.includes(option)
+      ? prev.filter((item) => item !== option)
+      : [...prev, option]
+    setAnswers((prevAnswers) => ({
+      ...prevAnswers,
+      [current.id]: updated.join("||"),
     }))
   }
 
@@ -466,7 +480,6 @@ export default function QuizComponent({ onComplete, savedAnswers = {}, onReset, 
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion((prev) => prev + 1)
     } else {
-      // Si es la última pregunta, iniciamos el proceso de envío directamente
       handleSubmit()
     }
   }
@@ -478,40 +491,31 @@ export default function QuizComponent({ onComplete, savedAnswers = {}, onReset, 
   }
 
   const handleSubmit = async () => {
-    // Evitar múltiples envíos
     if (isSubmitting) return
-
     setIsSubmitting(true)
-
-    // Simular un tiempo de carga de 4 segundos como se solicitó
     await new Promise((resolve) => setTimeout(resolve, 4000))
-
-    // Simular envío al webhook (la lógica real está en page.tsx)
     console.log("Quiz completado, respuestas:", answers)
-
-    // Importante: mantener isSubmitting en true para evitar que se vuelva a mostrar la pregunta
-    // No establecer isSubmitting a false aquí
-
-    // Llamar a onComplete para avanzar a la siguiente pantalla
     onComplete(answers)
   }
 
   const progress = ((currentQuestion + 1) / questions.length) * 100
+  const isAnswered = isMultiSelect
+    ? answers[current.id]?.split("||").length > 0
+    : !!answers[current.id]
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
-        {/* Header */}
         <motion.div
           className="text-center mb-12"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight">{t("quiz.title")}</h1>
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight whitespace-nowrap">
+            {t("quiz.title")}
+          </h1>
           <p className="text-xl text-gray-400 font-medium">{t("quiz.subtitle")}</p>
-
-          {/* Botón de reset si hay respuestas guardadas */}
           {Object.keys(savedAnswers).length > 0 && onReset && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="mt-4">
               <Button
@@ -531,39 +535,16 @@ export default function QuizComponent({ onComplete, savedAnswers = {}, onReset, 
           <motion.div className="text-center py-16" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <motion.div
               animate={{ rotate: 360 }}
-              transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
               className="inline-block mb-6"
             >
               <Loader2 className="w-16 h-16 text-[#FF4D00]" />
             </motion.div>
             <h3 className="text-2xl font-bold mb-4">{t("quiz.processing")}</h3>
             <p className="text-gray-400 text-lg">{t("quiz.analyzing")}</p>
-            <motion.div
-              className="mt-8 flex justify-center space-x-2"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-            >
-              {[0, 1, 2].map((i) => (
-                <motion.div
-                  key={i}
-                  className="w-3 h-3 bg-[#FF4D00] rounded-full"
-                  animate={{
-                    scale: [1, 1.2, 1],
-                    opacity: [0.5, 1, 0.5],
-                  }}
-                  transition={{
-                    duration: 1.5,
-                    repeat: Number.POSITIVE_INFINITY,
-                    delay: i * 0.2,
-                  }}
-                />
-              ))}
-            </motion.div>
           </motion.div>
         ) : (
           <>
-            {/* Progress Bar */}
             <motion.div className="mb-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
               <div className="flex justify-between text-sm text-gray-400 mb-2">
                 <span>
@@ -581,7 +562,6 @@ export default function QuizComponent({ onComplete, savedAnswers = {}, onReset, 
               </div>
             </motion.div>
 
-            {/* Question Card */}
             <motion.div
               key={currentQuestion}
               initial={{ opacity: 0, x: 50 }}
@@ -591,38 +571,67 @@ export default function QuizComponent({ onComplete, savedAnswers = {}, onReset, 
             >
               <Card className="bg-gray-900/50 border-gray-800 rounded-2xl p-8 shadow-xl backdrop-blur-sm">
                 <h2 className="text-2xl md:text-3xl font-bold mb-8 leading-tight">
-                  {questions[currentQuestion].question[language]}
+                  {current.question[language]}
                 </h2>
 
-                <RadioGroup
-                  value={answers[questions[currentQuestion].id] || ""}
-                  onValueChange={handleAnswer}
-                  className="space-y-4"
-                >
-                  {questions[currentQuestion].options[language].map((option, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="group"
-                    >
-                      <div className="flex items-center space-x-4 p-4 rounded-xl border border-gray-700 hover:border-[#FF4D00] transition-all duration-300 cursor-pointer hover:bg-gray-800/30">
-                        <RadioGroupItem value={option} id={option} className="border-gray-600" />
-                        <Label
-                          htmlFor={option}
-                          className="text-lg font-medium cursor-pointer flex-1 group-hover:text-[#FF4D00] transition-colors"
+                {isMultiSelect ? (
+                  <div className="space-y-4">
+                    {current.options[language].map((option, index) => {
+                      const selected = answers[current.id]?.split("||") || []
+                      const checked = selected.includes(option)
+                      return (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className="group"
                         >
-                          {option}
-                        </Label>
-                      </div>
-                    </motion.div>
-                  ))}
-                </RadioGroup>
+                          {current.id === "q11" && (
+                            <div
+                              onClick={() => toggleMultiSelectOption(option)}
+                              className="flex items-center space-x-4 p-4 rounded-xl border border-gray-700 hover:border-[#FF4D00] transition-all duration-300 cursor-pointer hover:bg-gray-800/30"
+                            >
+                              <Checkbox checked={checked} className="border-gray-600" />
+                              <Label className="text-lg font-medium cursor-pointer flex-1 group-hover:text-[#FF4D00] transition-colors">
+                                {option}
+                              </Label>
+                            </div>
+                          )}
+                        </motion.div>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <RadioGroup
+                    value={answers[current.id] || ""}
+                    onValueChange={handleAnswer}
+                    className="space-y-4"
+                  >
+                    {current.options[language].map((option, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="group"
+                      >
+                        <div className="flex items-center space-x-4 p-4 rounded-xl border border-gray-700 hover:border-[#FF4D00] transition-all duration-300 cursor-pointer hover:bg-gray-800/30">
+                          <RadioGroupItem value={option} id={option} className="border-gray-600" />
+                          <Label
+                            htmlFor={option}
+                            className="text-lg font-medium cursor-pointer flex-1 group-hover:text-[#FF4D00] transition-colors"
+                          >
+                            {option}
+                          </Label>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </RadioGroup>
+                )}
               </Card>
             </motion.div>
 
-            {/* Navigation */}
             <motion.div
               className="flex justify-between mt-8"
               initial={{ opacity: 0 }}
@@ -641,7 +650,7 @@ export default function QuizComponent({ onComplete, savedAnswers = {}, onReset, 
 
               <Button
                 onClick={handleNext}
-                disabled={!answers[questions[currentQuestion].id]}
+                disabled={!isAnswered}
                 className="bg-white text-black hover:bg-gray-200 font-bold px-8 disabled:opacity-50"
               >
                 {currentQuestion === questions.length - 1 ? t("quiz.seeResult") : t("quiz.next")}
