@@ -14,13 +14,15 @@ import { useLanguage } from "@/contexts/language-context"
 import CalendlyModal from "./calendly-modal"
 
 interface ResultsAndFormProps {
-  score: number
+  score: number | null
   reportHTML: string
   onSubmit: (data: any) => void
-  onReset?: () => void
+  onReset: () => void
+  isLoadingScore: boolean
+  isLoadingReport: boolean
 }
 
-export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset }: ResultsAndFormProps) {
+export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, isLoadingScore, isLoadingReport }: ResultsAndFormProps) {
   const { t } = useLanguage()
   const [formData, setFormData] = useState({
     firstName: "",
@@ -74,6 +76,7 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset }:
     formData.firstName && formData.lastName && formData.phone && formData.email && formData.acceptTerms
 
   const getLevelText = () => {
+    if (score === null) return ""
     if (score < 30) return t("results.level.initial")
     if (score < 60) return t("results.level.developing")
     if (score < 80) return t("results.level.advanced")

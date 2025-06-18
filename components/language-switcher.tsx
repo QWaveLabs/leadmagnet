@@ -4,11 +4,20 @@ import { useLanguage } from "@/contexts/language-context"
 import { Button } from "@/components/ui/button"
 import { Globe } from "lucide-react"
 
-export default function LanguageSwitcher() {
-  const { language, setLanguage, t } = useLanguage()
+interface LanguageSwitcherProps {
+  onLanguageChange: (lang: string) => void;
+  currentLanguage: string;
+}
+
+const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ 
+  onLanguageChange, 
+  currentLanguage 
+}) => {
+  const { t } = useLanguage()
 
   const toggleLanguage = () => {
-    setLanguage(language === "en" ? "es" : "en")
+    const newLang = currentLanguage === "en" ? "es" : "en"
+    onLanguageChange(newLang)
   }
 
   return (
@@ -23,3 +32,5 @@ export default function LanguageSwitcher() {
     </Button>
   )
 }
+
+export default LanguageSwitcher

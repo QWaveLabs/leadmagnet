@@ -12,6 +12,7 @@ import LanguageSwitcher from "@/components/language-switcher"
 // Webhook URLs from environment variables
 const WEBHOOK_1_URL = process.env.NEXT_PUBLIC_WEBHOOK_1_URL!
 const WEBHOOK_2_URL = process.env.NEXT_PUBLIC_WEBHOOK_2_URL!
+const WEBHOOK_3_URL = process.env.NEXT_PUBLIC_WEBHOOK_3_URL!
 
 // Claves para localStorage
 const STORAGE_KEYS = {
@@ -31,6 +32,13 @@ export default function HomePage() {
   } | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+
+  // Add these new state variables after the existing state declarations
+  const [isLoadingScore, setIsLoadingScore] = useState(true)
+  const [isLoadingReport, setIsLoadingReport] = useState(true)
+  const [score, setScore] = useState<number | null>(null)
+  const [reportHTML, setReportHTML] = useState<string>("")
+  const [currentLanguage, setCurrentLanguage] = useState<string>("en")
 
   // Cargar datos del localStorage al inicializar
   useEffect(() => {
@@ -96,105 +104,139 @@ export default function HomePage() {
 
   const handleQuizComplete = async (answers: Record<string, string>) => {
     setQuizAnswers(answers)
+    
+    // First call - Get Score (Webhook 3)
     try {
-      console.log("Enviando respuestas al webhook:", answers)
-      const response = await fetch(WEBHOOK_1_URL, {
+      setIsLoadingScore(true)
+      const scoreResponse = await fetch(WEBHOOK_3_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answers }),
+        body: JSON.stringify({ 
+          answers,
+          lang: currentLanguage || "en" // Default to English if no language is set
+        }),
       })
 
-      if (!response.ok) {
-        throw new Error(`Error HTTP: ${response.status}`)
+      if (!scoreResponse.ok) {
+        throw new Error(`Error HTTP: ${scoreResponse.status}`)
       }
 
-      // Get response as text
-      const responseText = await response.text()
-      
+      const scoreData = await scoreResponse.json()
+      const calculatedScore = scoreData.score || 0
+      setScore(calculatedScore)
+      setIsLoadingScore(false)
+
+      // Second call - Get Report (Webhook 1)
       try {
-        // Try to parse the JSON directly first
-        const data = JSON.parse(responseText)
-        console.log("Respuesta del webhook (parseada):", data)
-        
-        setQuizResults({
-          score: data.score || 0,
-          reportHTML: data.reportHTML || ""
+        setIsLoadingReport(true)
+        const reportResponse = await fetch(WEBHOOK_1_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            answers,
+            lang: currentLanguage,
+            score: calculatedScore.toString() // Convert number to string to match API format
+          }),
         })
-        setCurrentStep("results-form")
-      } catch (parseError) {
-        console.error("Error al parsear JSON:", parseError)
-        
-        // If parsing fails, try to clean the response
-        try {
-          // Remove newlines and properly escape quotes
-          const cleanedResponse = responseText
-            .replace(/\n/g, '')
-            .replace(/\r/g, '')
-            .replace(/\\/g, '\\\\')
-            .replace(/\\"/g, '\\"')
-          
-          const data = JSON.parse(cleanedResponse)
-          
-          setQuizResults({
-            score: data.score || 0,
-            reportHTML: data.reportHTML || ""
-          })
-          setCurrentStep("results-form")
-        } catch (secondError) {
-          console.error("Error en segundo intento de parsing:", secondError)
-          // Use regex as last resort
-          const scoreMatch = responseText.match(/"score":\s*(\d+)/)
-          const reportMatch = responseText.match(/"reportHTML":\s*"([\s\S]+?)(?="\n})/)
-          
-          if (scoreMatch && reportMatch) {
-            setQuizResults({
-              score: parseInt(scoreMatch[1]),
-              reportHTML: reportMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"')
-            })
-            setCurrentStep("results-form")
-          } else {
-            throw new Error("No se pudo extraer la información necesaria")
-          }
+
+        if (!reportResponse.ok) {
+          throw new Error(`Error HTTP: ${reportResponse.status}`)
         }
+
+        const reportData = await reportResponse.json()
+        setReportHTML(reportData.reportHTML || "")
+        setQuizResults({
+          score: calculatedScore,
+          reportHTML: reportData.reportHTML
+        })
+        setIsLoadingReport(false)
+        setCurrentStep("results-form")
+      } catch (reportError) {
+        console.error("Error al obtener el reporte:", reportError)
+        // Fallback para el reporte
+         const simulatedReportHTML = generateSimulatedReport(answers, calculatedScore)
+          setReportHTML(simulatedReportHTML)
+        setQuizResults({
+          score: calculatedScore,
+          reportHTML: simulatedReportHTML
+        }) 
+        setIsLoadingReport(false)
+        setCurrentStep("results-form")
       }
-    } catch (error) {
-      console.error("Error al enviar respuestas:", error)
-      // Fallback to simulation
+    } catch (scoreError) {
+      console.error("Error al obtener el score:", scoreError)
+      // Fallback para el score
       const simulatedScore = calculateSimulatedScore(answers)
-      const simulatedReportHTML = generateSimulatedReport(answers, simulatedScore)
-      setQuizResults({ score: simulatedScore, reportHTML: simulatedReportHTML })
-      setCurrentStep("results-form")
+      setScore(simulatedScore)
+      setIsLoadingScore(false)
+      // Continue with report using simulated score...
+      try {
+        setIsLoadingReport(true)
+        const reportResponse = await fetch(WEBHOOK_1_URL, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            answers,
+            score: simulatedScore 
+          }),
+        })
+
+        if (!reportResponse.ok) {
+          throw new Error(`Error HTTP: ${reportResponse.status}`)
+        }
+
+        const reportData = await reportResponse.json()
+        setReportHTML(reportData.reportHTML || "")
+        setQuizResults({
+          score: simulatedScore,
+          reportHTML: reportData.reportHTML
+        })
+        setIsLoadingReport(false)
+        setCurrentStep("results-form")
+      } catch (reportError) {
+        console.error("Error al obtener el reporte con score simulado:", reportError)
+        // Fallback final para el reporte
+        const simulatedReportHTML = generateSimulatedReport(answers, simulatedScore)
+        setReportHTML(simulatedReportHTML)
+        setQuizResults({
+          score: simulatedScore,
+          reportHTML: simulatedReportHTML
+        })
+        setIsLoadingReport(false)
+        setCurrentStep("results-form")
+      }
     }
   }
 
   const handleFormSubmit = async (leadData: any) => {
     saveToStorage(STORAGE_KEYS.FORM_DATA, leadData)
     try {
-      console.log("Enviando datos al webhook 2:", {
-        leadInfo: leadData,
-        score: quizResults?.score || 0,
-        reportHTML: quizResults?.reportHTML || "",
-      })
       const response = await fetch(WEBHOOK_2_URL, {
-        method: "POST",
+        method: "GET",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          leadInfo: leadData,
+          leadInfo: {
+            firstName: leadData.firstName,
+            lastName: leadData.lastName,
+            phone: leadData.phone,
+            email: leadData.email,
+            acceptTerms: leadData.acceptTerms
+          },
           score: quizResults?.score || 0,
           reportHTML: quizResults?.reportHTML || "",
+          lang: currentLanguage
         }),
       })
-      if (!response.ok) throw new Error("Error al procesar el formulario")
+
+      if (!response.ok) {
+        throw new Error(`Error HTTP: ${response.status}`)
+      }
+
       const data = await response.json()
-      console.log("Respuesta del webhook 2:", data)
-      setQuizResults({
-        score: data.score,
-        reportHTML: data.reportHTML,
-      })
       setCurrentStep("confirmation")
     } catch (error) {
       console.error("Error al enviar formulario:", error)
-      setCurrentStep("confirmation")
+      setCurrentStep("confirmation") // Fallback to confirmation even on error
     }
   }
 
@@ -315,7 +357,12 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
       <BackgroundEffects />
-      {isFirstQuestion && <LanguageSwitcher />} 
+      {isFirstQuestion && (
+        <LanguageSwitcher
+          currentLanguage={currentLanguage}
+          onLanguageChange={setCurrentLanguage}
+        />
+      )} 
       <div className="relative z-10">
         <AnimatePresence mode="wait">
           
@@ -346,10 +393,12 @@ export default function HomePage() {
               transition={{ duration: 0.5, ease: "easeInOut" }}
             >
               <ResultsAndForm
-                score={quizResults?.score || 0}
-                reportHTML={quizResults?.reportHTML || ""}
+                score={score}
+                reportHTML={reportHTML}
                 onSubmit={handleFormSubmit}
                 onReset={handleResetQuiz}
+                isLoadingScore={isLoadingScore}
+                isLoadingReport={isLoadingReport}
               />
             </motion.div>
           )}
