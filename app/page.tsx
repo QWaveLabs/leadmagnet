@@ -1,5 +1,4 @@
 "use client"
-
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import QuizComponent from "@/components/quiz-component"
@@ -10,9 +9,9 @@ import BackgroundEffects from "@/components/background-effects"
 import LanguageSwitcher from "@/components/language-switcher"
 
 // Webhook URLs from environment variables
-const WEBHOOK_1_URL = process.env.NEXT_PUBLIC_WEBHOOK_1_URL!
-const WEBHOOK_2_URL = process.env.NEXT_PUBLIC_WEBHOOK_2_URL!
-const WEBHOOK_3_URL = process.env.NEXT_PUBLIC_WEBHOOK_3_URL!
+const WEBHOOK_1_URL = process.env.NEXT_PUBLIC_WEBHOOK_1_URL! // Report Generation
+const WEBHOOK_2_URL = process.env.NEXT_PUBLIC_WEBHOOK_2_URL! // Lead Submission
+const WEBHOOK_3_URL = process.env.NEXT_PUBLIC_WEBHOOK_3_URL! // Score Calculation
 
 // Claves para localStorage
 const STORAGE_KEYS = {
@@ -22,20 +21,25 @@ const STORAGE_KEYS = {
   FORM_DATA: "quiz_form_data",
 }
 
+// Debug logging utility
+const debugLog = (action: string, data: any) => {
+  console.log(`[DEBUG] ${action}:`, data)
+}
+
 export default function HomePage() {
   const [currentStep, setCurrentStep] = useState<"quiz" | "results-form" | "confirmation">("quiz")
   const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({})
-  const [isFirstQuestion, setIsFirstQuestion] = useState(true) // Añade este estado
+  const [isFirstQuestion, setIsFirstQuestion] = useState(true)
   const [quizResults, setQuizResults] = useState<{
     score: number
     reportHTML: string
   } | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-
-  // Add these new state variables after the existing state declarations
-  const [isLoadingScore, setIsLoadingScore] = useState(true)
-  const [isLoadingReport, setIsLoadingReport] = useState(true)
+  
+  // Separate loading states for better UX
+  const [isLoadingScore, setIsLoadingScore] = useState(false)
+  const [isLoadingReport, setIsLoadingReport] = useState(false)
   const [score, setScore] = useState<number | null>(null)
   const [reportHTML, setReportHTML] = useState<string>("")
   const [currentLanguage, setCurrentLanguage] = useState<string>("en")
@@ -44,17 +48,28 @@ export default function HomePage() {
   useEffect(() => {
     const loadFromStorage = () => {
       try {
+        debugLog("Loading from localStorage", "Starting...")
+        
         const savedStep = localStorage.getItem(STORAGE_KEYS.CURRENT_STEP)
         if (savedStep && ["quiz", "results-form", "confirmation"].includes(savedStep)) {
           setCurrentStep(savedStep as "quiz" | "results-form" | "confirmation")
+          debugLog("Loaded step from storage", savedStep)
         }
+        
         const savedAnswers = localStorage.getItem(STORAGE_KEYS.QUIZ_ANSWERS)
         if (savedAnswers) {
-          setQuizAnswers(JSON.parse(savedAnswers))
+          const parsedAnswers = JSON.parse(savedAnswers)
+          setQuizAnswers(parsedAnswers)
+          debugLog("Loaded answers from storage", parsedAnswers)
         }
+        
         const savedResults = localStorage.getItem(STORAGE_KEYS.QUIZ_RESULTS)
         if (savedResults) {
-          setQuizResults(JSON.parse(savedResults))
+          const parsedResults = JSON.parse(savedResults)
+          setQuizResults(parsedResults)
+          setScore(parsedResults.score)
+          setReportHTML(parsedResults.reportHTML)
+          debugLog("Loaded results from storage", parsedResults)
         }
       } catch (error) {
         console.error("Error al cargar datos del localStorage:", error)
@@ -70,12 +85,14 @@ export default function HomePage() {
     Object.values(STORAGE_KEYS).forEach((key) => {
       localStorage.removeItem(key)
     })
+    debugLog("Storage cleared", "All keys removed")
   }
 
   // Función para guardar en localStorage
   const saveToStorage = (key: string, data: any) => {
     try {
       localStorage.setItem(key, JSON.stringify(data))
+      debugLog(`Saved to storage: ${key}`, data)
     } catch (error) {
       console.error("Error al guardar en localStorage:", error)
     }
@@ -85,6 +102,7 @@ export default function HomePage() {
   useEffect(() => {
     if (!isLoading) {
       localStorage.setItem(STORAGE_KEYS.CURRENT_STEP, currentStep)
+      debugLog("Step updated in storage", currentStep)
     }
   }, [currentStep, isLoading])
 
@@ -104,17 +122,25 @@ export default function HomePage() {
 
   const handleQuizComplete = async (answers: Record<string, string>) => {
     setQuizAnswers(answers)
+    debugLog("Quiz completed with answers", answers)
     
-    // First call - Get Score (Webhook 3)
+    // FIRST CALL - Get Score (Webhook 3) - Fast response expected
+    setIsLoadingScore(true)
+    debugLog("Starting score request", { webhook: WEBHOOK_3_URL, answers, lang: currentLanguage })
+    
     try {
-      setIsLoadingScore(true)
       const scoreResponse = await fetch(WEBHOOK_3_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           answers,
-          lang: currentLanguage || "en" // Default to English if no language is set
+          lang: currentLanguage || "en"
         }),
+      })
+
+      debugLog("Score response received", { 
+        status: scoreResponse.status, 
+        ok: scoreResponse.ok 
       })
 
       if (!scoreResponse.ok) {
@@ -122,21 +148,39 @@ export default function HomePage() {
       }
 
       const scoreData = await scoreResponse.json()
+      debugLog("Score data parsed", scoreData)
+      
       const calculatedScore = scoreData.score || 0
       setScore(calculatedScore)
       setIsLoadingScore(false)
+      
+      // Navigate to results immediately with score
+      setCurrentStep("results-form")
+      debugLog("Navigation to results-form with score", calculatedScore)
 
-      // Second call - Get Report (Webhook 1)
+      // SECOND CALL - Get Report (Webhook 1) - Background loading
+      setIsLoadingReport(true)
+      debugLog("Starting report request", { 
+        webhook: WEBHOOK_1_URL, 
+        answers, 
+        lang: currentLanguage, 
+        score: calculatedScore 
+      })
+
       try {
-        setIsLoadingReport(true)
         const reportResponse = await fetch(WEBHOOK_1_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ 
             answers,
             lang: currentLanguage,
-            score: calculatedScore.toString() // Convert number to string to match API format
+            score: calculatedScore.toString()
           }),
+        })
+
+        debugLog("Report response received", { 
+          status: reportResponse.status, 
+          ok: reportResponse.ok 
         })
 
         if (!reportResponse.ok) {
@@ -144,40 +188,53 @@ export default function HomePage() {
         }
 
         const reportData = await reportResponse.json()
+        debugLog("Report data parsed", reportData)
+        
         setReportHTML(reportData.reportHTML || "")
         setQuizResults({
           score: calculatedScore,
-          reportHTML: reportData.reportHTML
+          reportHTML: reportData.reportHTML || ""
         })
         setIsLoadingReport(false)
-        setCurrentStep("results-form")
+        
       } catch (reportError) {
         console.error("Error al obtener el reporte:", reportError)
-        // Fallback para el reporte
-         const simulatedReportHTML = generateSimulatedReport(answers, calculatedScore)
-          setReportHTML(simulatedReportHTML)
+        debugLog("Report request failed, using fallback", reportError)
+        
+        // MOCK DATA FALLBACK - Commented out for production
+        /*
+        const simulatedReportHTML = generateSimulatedReport(answers, calculatedScore)
+        setReportHTML(simulatedReportHTML)
         setQuizResults({
           score: calculatedScore,
           reportHTML: simulatedReportHTML
-        }) 
+        })
+        */
+        
         setIsLoadingReport(false)
-        setCurrentStep("results-form")
       }
+
     } catch (scoreError) {
       console.error("Error al obtener el score:", scoreError)
-      // Fallback para el score
+      debugLog("Score request failed, using fallback", scoreError)
+      
+      // MOCK DATA FALLBACK - Commented out for production
+      /*
       const simulatedScore = calculateSimulatedScore(answers)
       setScore(simulatedScore)
       setIsLoadingScore(false)
-      // Continue with report using simulated score...
+      setCurrentStep("results-form")
+      
+      // Continue with report request using simulated score
+      setIsLoadingReport(true)
       try {
-        setIsLoadingReport(true)
         const reportResponse = await fetch(WEBHOOK_1_URL, {
-          method: "GET",
+          method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ 
             answers,
-            score: simulatedScore 
+            lang: currentLanguage,
+            score: simulatedScore.toString()
           }),
         })
 
@@ -189,13 +246,12 @@ export default function HomePage() {
         setReportHTML(reportData.reportHTML || "")
         setQuizResults({
           score: simulatedScore,
-          reportHTML: reportData.reportHTML
+          reportHTML: reportData.reportHTML || ""
         })
         setIsLoadingReport(false)
-        setCurrentStep("results-form")
+        
       } catch (reportError) {
         console.error("Error al obtener el reporte con score simulado:", reportError)
-        // Fallback final para el reporte
         const simulatedReportHTML = generateSimulatedReport(answers, simulatedScore)
         setReportHTML(simulatedReportHTML)
         setQuizResults({
@@ -203,51 +259,77 @@ export default function HomePage() {
           reportHTML: simulatedReportHTML
         })
         setIsLoadingReport(false)
-        setCurrentStep("results-form")
       }
+      */
+      
+      // For now, just show error state
+      setIsLoadingScore(false)
+      setIsLoadingReport(false)
     }
   }
 
   const handleFormSubmit = async (leadData: any) => {
     saveToStorage(STORAGE_KEYS.FORM_DATA, leadData)
+    
+    const submitData = {
+      leadInfo: {
+        firstName: leadData.firstName,
+        lastName: leadData.lastName,
+        phone: leadData.phone,
+        email: leadData.email,
+        acceptTerms: leadData.acceptTerms
+      },
+      score: quizResults?.score || score || 0,
+      reportHTML: quizResults?.reportHTML || reportHTML || "",
+      lang: currentLanguage
+    }
+    
+    debugLog("Starting form submission", { webhook: WEBHOOK_2_URL, data: submitData })
+    
     try {
       const response = await fetch(WEBHOOK_2_URL, {
-        method: "GET",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          leadInfo: {
-            firstName: leadData.firstName,
-            lastName: leadData.lastName,
-            phone: leadData.phone,
-            email: leadData.email,
-            acceptTerms: leadData.acceptTerms
-          },
-          score: quizResults?.score || 0,
-          reportHTML: quizResults?.reportHTML || "",
-          lang: currentLanguage
-        }),
+        body: JSON.stringify(submitData),
+      })
+
+      debugLog("Form submission response", { 
+        status: response.status, 
+        ok: response.ok 
       })
 
       if (!response.ok) {
         throw new Error(`Error HTTP: ${response.status}`)
       }
 
-      const data = await response.json()
+      const responseData = await response.json()
+      debugLog("Form submission successful", responseData)
+      
       setCurrentStep("confirmation")
+      
     } catch (error) {
       console.error("Error al enviar formulario:", error)
-      setCurrentStep("confirmation") // Fallback to confirmation even on error
+      debugLog("Form submission failed", error)
+      
+      // Continue to confirmation even on error for better UX
+      setCurrentStep("confirmation")
     }
   }
 
   const handleResetQuiz = () => {
+    debugLog("Resetting quiz", "Clearing all data")
     clearStorage()
     setCurrentStep("quiz")
     setQuizAnswers({})
     setQuizResults(null)
+    setScore(null)
+    setReportHTML("")
+    setIsLoadingScore(false)
+    setIsLoadingReport(false)
   }
 
-  // Funciones auxiliares
+  // MOCK DATA FUNCTIONS - Commented out for production use
+  /*
   const calculateSimulatedScore = (answers: Record<string, string>): number => {
     const positiveKeywords = [
       "Avanzado", "Experto", "Crítica", "Data-driven",
@@ -335,6 +417,7 @@ export default function HomePage() {
       </ul>
     `
   }
+  */
 
   if (isLoading) {
     return (
@@ -378,12 +461,11 @@ export default function HomePage() {
                 onComplete={handleQuizComplete} 
                 savedAnswers={quizAnswers} 
                 onReset={handleResetQuiz}
-                onQuestionChange={(isFirst: boolean) => setIsFirstQuestion(isFirst)} // Añade esta prop
+                onQuestionChange={(isFirst: boolean) => setIsFirstQuestion(isFirst)}
               />
             </motion.div>
           )}
-
-
+          
           {currentStep === "results-form" && (
             <motion.div
               key="results-form"
@@ -402,6 +484,7 @@ export default function HomePage() {
               />
             </motion.div>
           )}
+          
           {currentStep === "confirmation" && (
             <motion.div
               key="confirmation"
@@ -413,7 +496,7 @@ export default function HomePage() {
               <ConfirmationDisplay 
                 onOpenModal={() => setIsModalOpen(true)} 
                 onReset={handleResetQuiz} 
-                reportHTML={quizResults?.reportHTML || ""}
+                reportHTML={quizResults?.reportHTML || reportHTML || ""}
               />
             </motion.div>
           )}
