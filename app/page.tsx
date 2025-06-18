@@ -169,34 +169,57 @@ export default function HomePage() {
 
       try {
         const reportResponse = await fetch(WEBHOOK_1_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
             answers,
             lang: currentLanguage,
-            score: calculatedScore.toString()
-          }),
+            score: calculatedScore
+          })
         })
 
-        debugLog("Report response received", { 
-          status: reportResponse.status, 
-          ok: reportResponse.ok 
-        })
+        const reportText = await reportResponse.text()
 
-        if (!reportResponse.ok) {
-          throw new Error(`Error HTTP: ${reportResponse.status}`)
+        try {
+          const parsed = JSON.parse(reportText)
+          debugLog("Report data parsed", parsed)
+          setReportHTML(parsed.reportHTML || "")
+          setQuizResults({
+            score: calculatedScore,
+            reportHTML: parsed.reportHTML || ""
+          })
+          setIsLoadingReport(false)
+        } catch (parseError) {
+          console.error("Error parsing report JSON:", parseError)
+          debugLog("Trying to clean the response and parse again", parseError)
+          try {
+            const cleanedResponse = reportText
+              .replace(/\n/g, '')
+              .replace(/\r/g, '')
+              .replace(/\\/g, '\\\\')
+              .replace(/\\"/g, '\\"')
+
+            const fallbackParsed = JSON.parse(cleanedResponse)
+            setReportHTML(fallbackParsed.reportHTML || "")
+            setQuizResults({
+              score: calculatedScore,
+              reportHTML: fallbackParsed.reportHTML || ""
+            })
+            setIsLoadingReport(false)
+          } catch (secondError) {
+            console.error("Second parsing attempt failed:", secondError)
+            const reportMatch = reportText.match(/"reportHTML":\s*"([\s\S]+?)"(?=\n?})/)
+            const fallbackReport = reportMatch ? reportMatch[1].replace(/\\"/g, '"') : ""
+            setReportHTML(fallbackReport)
+            setQuizResults({
+              score: calculatedScore,
+              reportHTML: fallbackReport
+            })
+            setIsLoadingReport(false)
+          }
         }
-
-        const reportData = await reportResponse.json()
-        debugLog("Report data parsed", reportData)
-        
-        setReportHTML(reportData.reportHTML || "")
-        setQuizResults({
-          score: calculatedScore,
-          reportHTML: reportData.reportHTML || ""
-        })
-        setIsLoadingReport(false)
-        
       } catch (reportError) {
         console.error("Error al obtener el reporte:", reportError)
         debugLog("Report request failed, using fallback", reportError)

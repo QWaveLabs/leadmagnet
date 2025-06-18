@@ -39,6 +39,7 @@ const translations = {
     "results.level.exceptional": "Nivel excepcional - ¡Felicidades!",
     "results.analysis": "Análisis Detallado",
     "results.error": "No se pudo generar el reporte. Por favor, intenta nuevamente.",
+    "results.loading": "Cargando tus resultados...",
 
     // Form
     "form.title": "OBTÉN TU REPORTE COMPLETO",
@@ -98,6 +99,7 @@ const translations = {
     "results.level.exceptional": "Exceptional level - Congratulations!",
     "results.analysis": "Detailed Analysis",
     "results.error": "The report could not be generated. Please try again.",
+    "results.loading": "Loading your results...",
 
     // Form
     "form.title": "GET YOUR COMPLETE REPORT",

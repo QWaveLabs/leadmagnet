@@ -9,9 +9,8 @@ import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { User, Mail, Phone, Send, Award, Sparkles, CheckCircle, RotateCcw, Calendar } from "lucide-react"
+import { User, Mail, Phone, Send, Award, Sparkles, CheckCircle, RotateCcw, Calendar, Loader2 } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
-import CalendlyModal from "./calendly-modal"
 
 interface ResultsAndFormProps {
   score: number | null
@@ -126,10 +125,19 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
                 <div className="relative mb-4">
                   <div className="w-24 h-24 rounded-full flex items-center justify-center bg-gradient-to-r from-[#FF4D00] to-[#FF6F3C] p-1">
                     <div className="w-full h-full rounded-full bg-gray-900 flex items-center justify-center">
-                      <div className="text-2xl font-bold text-white">
-                        {score}
-                        <span className="text-sm">/100</span>
-                      </div>
+                      {isLoadingScore ? (
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        >
+                          <Loader2 className="w-6 h-6 text-[#FF4D00]" />
+                        </motion.div>
+                      ) : (
+                        <div className="text-2xl font-bold text-white">
+                          {score}
+                          <span className="text-sm">/100</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <Award className="absolute -top-1 -right-1 w-6 h-6 text-[#FF4D00]" />
@@ -140,7 +148,7 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
                     <Sparkles className="w-5 h-5 text-[#FF4D00] mr-2" />
                     {t("results.score")}
                   </h3>
-                  <p className="text-sm text-gray-300">{getLevelText()}</p>
+                  <p className="text-sm text-gray-300">{!isLoadingScore && getLevelText()}</p>
                 </div>
               </div>
 
@@ -151,12 +159,25 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
                   {t("results.analysis")}
                 </h3>
 
-                <div
-                  className="prose prose-invert prose-sm max-w-none text-gray-300 leading-relaxed"
-                  dangerouslySetInnerHTML={{
-                    __html: reportHTML || `<p>${t("results.error")}</p>`,
-                  }}
-                />
+                {isLoadingReport ? (
+                  <div className="flex flex-col items-center justify-center h-64">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      className="mb-4"
+                    >
+                      <Loader2 className="w-8 h-8 text-[#FF4D00]" />
+                    </motion.div>
+                    <p className="text-gray-400">{t("results.loading")}</p>
+                  </div>
+                ) : (
+                  <div
+                    className="prose prose-invert prose-sm max-w-none text-gray-300 leading-relaxed"
+                    dangerouslySetInnerHTML={{
+                      __html: reportHTML || `<p>${t("results.error")}</p>`,
+                    }}
+                  />
+                )}
               </div>
             </Card>
           </motion.div>
