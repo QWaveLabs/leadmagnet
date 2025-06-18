@@ -512,7 +512,7 @@ export default function QuizComponent({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight whitespace-nowrap">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight ">
             {t("quiz.title")}
           </h1>
           <p className="text-xl text-gray-400 font-medium">{t("quiz.subtitle")}</p>
