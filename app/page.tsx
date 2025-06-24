@@ -7,6 +7,7 @@ import ConfirmationDisplay from "@/components/confirmation-display"
 import CalendlyModal from "@/components/calendly-modal"
 import BackgroundEffects from "@/components/background-effects"
 import LanguageSwitcher from "@/components/language-switcher"
+import { useLanguage } from "@/contexts/language-context"
 
 // Webhook URLs from environment variables
 const WEBHOOK_1_URL = process.env.NEXT_PUBLIC_WEBHOOK_1_URL! // Report Generation
@@ -42,7 +43,9 @@ export default function HomePage() {
   const [isLoadingReport, setIsLoadingReport] = useState(false)
   const [score, setScore] = useState<number | null>(null)
   const [reportHTML, setReportHTML] = useState<string>("")
-  const [currentLanguage, setCurrentLanguage] = useState<string>("en")
+  
+  // Use language context instead of local state
+  const { language } = useLanguage()
 
   // Cargar datos del localStorage al inicializar
   useEffect(() => {
@@ -126,7 +129,7 @@ export default function HomePage() {
     
     // FIRST CALL - Get Score (Webhook 3) - Fast response expected
     setIsLoadingScore(true)
-    debugLog("Starting score request", { webhook: WEBHOOK_3_URL, answers, lang: currentLanguage })
+    debugLog("Starting score request", { webhook: WEBHOOK_3_URL, answers, lang: language })
     
     try {
       const scoreResponse = await fetch(WEBHOOK_3_URL, {
@@ -134,7 +137,7 @@ export default function HomePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           answers,
-          lang: currentLanguage || "en"
+          lang: language || "en"
         }),
       })
 
@@ -163,7 +166,7 @@ export default function HomePage() {
       debugLog("Starting report request", { 
         webhook: WEBHOOK_1_URL, 
         answers, 
-        lang: currentLanguage, 
+        lang: language, 
         score: calculatedScore 
       })
 
@@ -175,7 +178,7 @@ export default function HomePage() {
           },
           body: JSON.stringify({
             answers,
-            lang: currentLanguage,
+            lang: language,
             score: calculatedScore
           })
         })
@@ -256,7 +259,7 @@ export default function HomePage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ 
             answers,
-            lang: currentLanguage,
+            lang: language,
             score: simulatedScore.toString()
           }),
         })
@@ -304,7 +307,7 @@ export default function HomePage() {
       },
       score: quizResults?.score || score || 0,
       reportHTML: quizResults?.reportHTML || reportHTML || "",
-      lang: currentLanguage
+      lang: language
     }
     
     debugLog("Starting form submission", { webhook: WEBHOOK_2_URL, data: submitData })
@@ -463,12 +466,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
       <BackgroundEffects />
-      {isFirstQuestion && (
-        <LanguageSwitcher
-          currentLanguage={currentLanguage}
-          onLanguageChange={setCurrentLanguage}
-        />
-      )} 
+      {isFirstQuestion && <LanguageSwitcher />} 
       <div className="relative z-10">
         <AnimatePresence mode="wait">
           

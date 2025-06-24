@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -170,8 +170,8 @@ const questions = [
       en: "How consistent is your lead-to-client conversion process?",
     },
     options: {
-      es: ["Nunca", "Raramente", "A veces", "A menudo", "Siempre"],
-      en: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+      es: ["Nada consistente", "Algo consistente", "Consistente"],
+      en: ["Not at all", "Somewhat consistent", "Consistent"],
     },
   },
   {
@@ -476,26 +476,37 @@ export default function QuizComponent({
     }))
   }
 
-  const handleNext = () => {
-    if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion((prev) => prev + 1)
-    } else {
-      handleSubmit()
-    }
-  }
-
-  const handlePrevious = () => {
-    if (currentQuestion > 0) {
-      setCurrentQuestion((prev) => prev - 1)
-    }
-  }
-
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (isSubmitting) return
     setIsSubmitting(true)
     await new Promise((resolve) => setTimeout(resolve, 4000))
     console.log("Quiz completado, respuestas:", answers)
     onComplete(answers)
+  }, [isSubmitting, answers, onComplete])
+
+  const handleNext = useCallback(() => {
+    if (currentQuestion < questions.length - 1) {
+      setCurrentQuestion((prev) => prev + 1)
+    } else {
+      handleSubmit()
+    }
+  }, [currentQuestion, questions.length, handleSubmit])
+
+  // Auto-advance for single choice questions
+  useEffect(() => {
+    if (!isMultiSelect && answers[current.id]) {
+      const timer = setTimeout(() => {
+        handleNext()
+      }, 800) // 800ms delay for better UX
+      
+      return () => clearTimeout(timer)
+    }
+  }, [answers[current.id], isMultiSelect, handleNext])
+
+  const handlePrevious = () => {
+    if (currentQuestion > 0) {
+      setCurrentQuestion((prev) => prev - 1)
+    }
   }
 
   const progress = ((currentQuestion + 1) / questions.length) * 100
