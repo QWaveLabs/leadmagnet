@@ -32,25 +32,10 @@ const ConfirmationDisplay: React.FC<ConfirmationDisplayProps> = ({ onOpenModal, 
             transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
             className="inline-block mb-6"
           >
-            <CheckCircle className="w-20 h-20 text-[#FF4D00] mx-auto" />
+            <CheckCircle className="w-20 h-20 text-purple-400 mx-auto" />
           </motion.div>
           <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight">{t("confirmation.title")}</h1>
           <p className="text-xl text-gray-400 font-medium">{t("confirmation.subtitle")}</p>
-
-          {/* Botón de reset */}
-          {onReset && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="mt-4">
-              <Button
-                onClick={onReset}
-                variant="outline"
-                size="sm"
-                className="bg-transparent border-gray-700 text-gray-400 hover:bg-gray-800 hover:text-white"
-              >
-                <RotateCcw className="w-4 h-4 mr-2" />
-                {t("confirmation.reset")}
-              </Button>
-            </motion.div>
-          )}
         </motion.div>
 
         {/* Confirmation Card */}
@@ -73,7 +58,7 @@ const ConfirmationDisplay: React.FC<ConfirmationDisplayProps> = ({ onOpenModal, 
                 transition={{ delay: 0.4 }}
                 className="flex items-center p-4 bg-gray-800/30 rounded-xl"
               >
-                <CheckCircle className="w-6 h-6 text-green-500 mr-4 flex-shrink-0" />
+                <CheckCircle className="w-6 h-6 text-purple-400 mr-4 flex-shrink-0" />
                 <div>
                   <h3 className="font-semibold">{t("confirmation.processed")}</h3>
                   <p className="text-sm text-gray-400">{t("confirmation.processed.desc")}</p>
@@ -108,33 +93,27 @@ const ConfirmationDisplay: React.FC<ConfirmationDisplayProps> = ({ onOpenModal, 
             </div>
 
             {/* CTA Section */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7 }}
-              className="border-t border-gray-700 pt-8"
-            >
-              <div className="bg-gradient-to-r from-[#FF4D00]/10 to-[#FF6F3C]/10 rounded-xl p-6 border border-[#FF4D00]/20">
+            <div className="mb-8">
+              <div className="bg-gradient-to-r from-purple-600/10 to-purple-400/10 rounded-xl p-6 border border-purple-400/20">
                 <h3 className="text-xl font-bold mb-3 text-center">{t("confirmation.cta.title")}</h3>
                 <p className="text-gray-300 mb-6 text-center">{t("confirmation.cta.desc")}</p>
-
                 <div className="text-center">
-                  <Button
-                    onClick={onOpenModal}
-                    className="bg-gradient-to-r from-[#FF4D00] to-[#FF6F3C] hover:from-[#FF6F3C] hover:to-[#FF4D00] text-white font-bold text-lg px-8 py-3 rounded-xl transition-all duration-300 transform hover:scale-105"
+                  <a
+                    href="https://qwavelabs.io/consultation"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center bg-gradient-to-r from-purple-600 to-purple-400 hover:from-purple-400 hover:to-purple-600 text-white font-bold text-lg px-8 py-3 rounded-xl transition-all duration-300 transform hover:scale-105"
                   >
-                    <Calendar className="w-5 h-5 mr-3" />
+                    <Calendar className="w-5 h-5 mr-3 text-purple-300" />
                     {t("confirmation.cta.button")}
-                  </Button>
+                  </a>
                 </div>
-
                 <p className="text-xs text-gray-500 text-center mt-4">{t("confirmation.cta.footer")}</p>
               </div>
-            </motion.div>
+            </div>
           </Card>
         </motion.div>
-
-          </div>
+      </div>
     </div>
   )
 }

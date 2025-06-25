@@ -116,9 +116,9 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <Card className="bg-gray-900/50 border-gray-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm h-full min-h-[700px]">
+            <Card className="bg-black border-gray-800 rounded-2xl p-6 shadow-xl h-full min-h-[700px]">
               {/* Score Display */}
-              <div className="flex flex-col items-center mb-6 p-4 bg-gradient-to-r from-gray-900 to-gray-800 rounded-xl">
+              <div className="flex flex-col items-center mb-6 p-4 bg-black rounded-xl border border-gray-800">
                 <div className="relative mb-4">
                   <div className="w-24 h-24 rounded-full flex items-center justify-center bg-gradient-to-r from-[#FF4D00] to-[#FF6F3C] p-1">
                     <div className="w-full h-full rounded-full bg-gray-900 flex items-center justify-center">
@@ -168,25 +168,26 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
                     <p className="text-gray-400">{t("results.loading")}</p>
                   </div>
                 ) : (
-                  <div
-                    className="prose prose-invert prose-sm max-w-none text-gray-300 leading-relaxed"
-                    dangerouslySetInnerHTML={{
-                      __html: reportHTML || `<p>${t("results.error")}</p>`,
-                    }}
-                  />
+                  <div className="bg-black border border-gray-800 rounded-xl p-6 text-gray-100 font-sans text-base leading-relaxed whitespace-pre-line shadow-lg">
+                    {reportHTML
+                      ? <ReportFormatter report={reportHTML} />
+                      : <p>{t("results.error")}</p>}
+                  </div>
                 )}
               </div>
             </Card>
           </motion.div>
 
                   <div className="text-center">
-                  <Button
-                    onClick={onOpenModal}
-                    className="bg-gradient-to-r from-purple-600 to-purple-400 hover:from-purple-400 hover:to-purple-600 text-white font-bold text-lg px-8 py-3 rounded-xl transition-all duration-300 transform hover:scale-105"
+                  <a
+                    href="https://qwavelabs.io/consultation"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center bg-gradient-to-r from-purple-600 to-purple-400 hover:from-purple-400 hover:to-purple-600 text-white font-bold text-lg px-8 py-3 rounded-xl transition-all duration-300 transform hover:scale-105"
                   >
                     <Calendar className="w-5 h-5 mr-3 text-purple-300" />
                     {t("confirmation.cta.button")}
-                  </Button>
+                  </a>
                    <h2 className="text-2xl font-bold mt-2">{t("form.separation")}</h2>
                 </div>
           
@@ -327,6 +328,29 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
           </motion.div>
         </div>
       </div>
+    </div>
+  )
+}
+
+// Helper component to format plain text or simple HTML into readable blocks
+function ReportFormatter({ report }: { report: string }) {
+  // If the report is HTML, render as HTML. If plain text, split into paragraphs and lists.
+  const isHTML = /<\w+.*?>/.test(report)
+  if (isHTML) {
+    return <div dangerouslySetInnerHTML={{ __html: report }} />
+  }
+  // Otherwise, format plain text
+  const paragraphs = report.split(/\n{2,}/).map((para, idx) => para.trim()).filter(Boolean)
+  return (
+    <div>
+      {paragraphs.map((para, idx) => {
+        // If looks like a list, render as ul
+        if (/^[-*•]/.test(para)) {
+          const items = para.split(/\n/).map(line => line.replace(/^[-*•]\s*/, '').trim()).filter(Boolean)
+          return <ul key={idx} className="list-disc pl-6 mb-4">{items.map((item, i) => <li key={i}>{item}</li>)}</ul>
+        }
+        return <p key={idx} className="mb-4">{para}</p>
+      })}
     </div>
   )
 }

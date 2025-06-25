@@ -515,7 +515,7 @@ export default function QuizComponent({
     : !!answers[current.id]
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center pt-[10px] pb-4 px-2 md:pt-8 md:px-4">
       <div className="w-full max-w-2xl">
         <motion.div
           className="text-center"
