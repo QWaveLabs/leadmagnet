@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -442,6 +442,7 @@ export default function QuizComponent({
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string>>(savedAnswers)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const navDirection = useRef<'next' | 'prev' | null>(null)
 
   const current = questions[currentQuestion]
   const isMultiSelect = !!current.multi;
@@ -465,6 +466,7 @@ export default function QuizComponent({
       ...prev,
       [current.id]: value,
     }))
+    navDirection.current = 'next'
   }
 
   const toggleMultiSelectOption = (option: string) => {
@@ -476,6 +478,7 @@ export default function QuizComponent({
       ...prevAnswers,
       [current.id]: updated.join("||"),
     }))
+    navDirection.current = 'next'
   }
 
   const handleSubmit = useCallback(() => {
@@ -485,6 +488,7 @@ export default function QuizComponent({
   }, [isSubmitting, answers, onComplete])
 
   const handleNext = useCallback(() => {
+    navDirection.current = 'next'
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion((prev) => prev + 1)
     } else {
@@ -492,14 +496,17 @@ export default function QuizComponent({
     }
   }, [currentQuestion, questions.length, handleSubmit])
 
-  // Auto-advance for single choice questions
+  // Auto-advance for single choice questions, but not when going back
   useEffect(() => {
-    if (!isMultiSelect && answers[current.id]) {
+    if (!isMultiSelect && answers[current.id] && navDirection.current !== 'prev') {
       handleNext()
     }
+    // Reset navDirection after handling
+    if (navDirection.current) navDirection.current = null
   }, [answers[current.id], isMultiSelect, handleNext])
 
   const handlePrevious = () => {
+    navDirection.current = 'prev'
     if (currentQuestion > 0) {
       setCurrentQuestion((prev) => prev - 1)
     }
