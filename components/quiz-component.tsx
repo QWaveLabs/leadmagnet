@@ -476,11 +476,9 @@ export default function QuizComponent({
     }))
   }
 
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = useCallback(() => {
     if (isSubmitting) return
     setIsSubmitting(true)
-    await new Promise((resolve) => setTimeout(resolve, 4000))
-    console.log("Quiz completado, respuestas:", answers)
     onComplete(answers)
   }, [isSubmitting, answers, onComplete])
 
@@ -495,11 +493,7 @@ export default function QuizComponent({
   // Auto-advance for single choice questions
   useEffect(() => {
     if (!isMultiSelect && answers[current.id]) {
-      const timer = setTimeout(() => {
-        handleNext()
-      }, 800) // 800ms delay for better UX
-      
-      return () => clearTimeout(timer)
+      handleNext()
     }
   }, [answers[current.id], isMultiSelect, handleNext])
 

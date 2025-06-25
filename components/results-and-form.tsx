@@ -120,7 +120,7 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
               {/* Score Display */}
               <div className="flex flex-col items-center mb-6 p-4 bg-black rounded-xl border border-gray-800">
                 <div className="relative mb-4">
-                  <div className="w-24 h-24 rounded-full flex items-center justify-center bg-gradient-to-r from-[#FF4D00] to-[#FF6F3C] p-1">
+                  <div className="w-24 h-24 rounded-full flex items-center justify-center bg-gradient-to-r from-purple-600 to-purple-400 p-1">
                     <div className="w-full h-full rounded-full bg-gray-900 flex items-center justify-center">
                       {isLoadingScore ? (
                         <motion.div
@@ -150,7 +150,7 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
               </div>
 
               {/* Report HTML */}
-              <div className="max-h-96 overflow-y-auto min-h-[700px]">
+              <div className="max-h-96 overflow-y-auto min-h-[700px] p-3 md:p-6">
                 <h3 className="text-lg font-bold mb-4 flex items-center">
                   <CheckCircle className="w-5 h-5 text-purple-400 mr-2" />
                   {t("results.analysis")}
@@ -168,7 +168,7 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
                     <p className="text-gray-400">{t("results.loading")}</p>
                   </div>
                 ) : (
-                  <div className="bg-black border border-gray-800 rounded-xl p-6 text-gray-100 font-sans text-base leading-relaxed whitespace-pre-line shadow-lg">
+                  <div className="bg-black border border-gray-800 rounded-xl p-3 md:p-6 text-gray-100 font-sans text-base leading-relaxed whitespace-pre-line shadow-lg">
                     {reportHTML
                       ? <ReportFormatter report={reportHTML} />
                       : <p>{t("results.error")}</p>}
@@ -178,154 +178,26 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
             </Card>
           </motion.div>
 
-                  <div className="text-center">
-                  <a
-                    href="https://qwavelabs.io/consultation"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center bg-gradient-to-r from-purple-600 to-purple-400 hover:from-purple-400 hover:to-purple-600 text-white font-bold text-lg px-8 py-3 rounded-xl transition-all duration-300 transform hover:scale-105"
-                  >
-                    <Calendar className="w-5 h-5 mr-3 text-purple-300" />
-                    {t("confirmation.cta.button")}
-                  </a>
-                   <h2 className="text-2xl font-bold mt-2">{t("form.separation")}</h2>
-                </div>
-          
-
-          {/* Form Section */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-          >
-            <Card className="bg-gray-900/50 border-gray-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm h-full">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold mb-2">{t("form.title")}</h2>
-                <p className="text-gray-400">{t("form.subtitle")}</p>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Name Fields */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                  >
-                    <Label htmlFor="firstName" className="text-sm font-medium mb-2 block">
-                      {t("form.firstName")} *
-                    </Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <Input
-                        id="firstName"
-                        type="text"
-                        value={formData.firstName}
-                        onChange={(e) => handleInputChange("firstName", e.target.value)}
-                        className="pl-10 bg-gray-800/50 border-gray-700 text-white placeholder-gray-400 h-10 rounded-lg focus:border-purple-400 focus:ring-purple-400"
-                        placeholder={t("form.firstName")}
-                        required
-                      />
-                    </div>
-                  </motion.div>
-
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6 }}
-                  >
-                    <Label htmlFor="lastName" className="text-sm font-medium mb-2 block">
-                      {t("form.lastName")} *
-                    </Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <Input
-                        id="lastName"
-                        type="text"
-                        value={formData.lastName}
-                        onChange={(e) => handleInputChange("lastName", e.target.value)}
-                        className="pl-10 bg-gray-800/50 border-gray-700 text-white placeholder-gray-400 h-10 rounded-lg focus:border-purple-400 focus:ring-purple-400"
-                        placeholder={t("form.lastName")}
-                        required
-                      />
-                    </div>
-                  </motion.div>
-                </div>
-
-                {/* Contact Fields */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
-                  <Label htmlFor="phone" className="text-sm font-medium mb-2 block">
-                    {t("form.phone")} *
-                  </Label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <Input
-                      id="phone"
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => handleInputChange("phone", e.target.value)}
-                      className="pl-10 bg-gray-800/50 border-gray-700 text-white placeholder-gray-400 h-10 rounded-lg focus:border-purple-400 focus:ring-purple-400"
-                      placeholder="+1 (555) 123-4567"
-                      required
-                    />
-                  </div>
-                </motion.div>
-
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}>
-                  <Label htmlFor="email" className="text-sm font-medium mb-2 block">
-                    {t("form.email")} *
-                  </Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => handleInputChange("email", e.target.value)}
-                      className="pl-10 bg-gray-800/50 border-gray-700 text-white placeholder-gray-400 h-10 rounded-lg focus:border-purple-400 focus:ring-purple-400"
-                      placeholder="tu@empresa.com"
-                      required
-                    />
-                  </div>
-                </motion.div>
-
-                {/* Terms Checkbox */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.9 }}
-                  className="flex items-start space-x-3 p-3 rounded-lg border border-gray-700"
-                >
-                  <Checkbox
-                    id="terms"
-                    checked={formData.acceptTerms}
-                    onCheckedChange={(checked) => handleInputChange("acceptTerms", checked as boolean)}
-                    className="mt-0.5 border-gray-600 data-[state=checked]:bg-purple-400 data-[state=checked]:border-purple-400"
-                  />
-                  <Label htmlFor="terms" className="text-xs text-gray-300 leading-relaxed cursor-pointer">
-                    {t("form.terms")}
-                  </Label>
-                </motion.div>
-
-                {/* Submit Button */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1.0 }}
-                  className="pt-2"
-                >
-                  <Button
-                    type="submit"
-                    disabled={!isFormValid}
-                    className="w-full bg-white text-black hover:bg-gray-200 font-bold text-sm h-12 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
-                  >
-                    <Send className="w-4 h-4 mr-2" />
-                    {t("form.submit")}
-                  </Button>
-                </motion.div>
-              </form>
-            </Card>
-          </motion.div>
+          <div className="flex flex-col md:flex-row gap-4 justify-center items-center mt-6">
+            <a
+              href="https://qwavelabs.io/consultation"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center bg-gradient-to-r from-purple-600 to-purple-400 hover:from-purple-400 hover:to-purple-600 text-white font-bold text-base md:text-lg px-4 py-2 md:px-8 md:py-3 rounded-xl transition-all duration-300 transform hover:scale-105 w-full md:w-auto"
+            >
+              <Calendar className="w-5 h-5 mr-2 md:mr-3 text-purple-300" />
+              {t("confirmation.cta.button")}
+            </a>
+            <Button
+              variant="outline"
+              className="w-full md:w-auto border-gray-700 text-gray-400 hover:bg-gray-800 hover:text-white text-base md:text-lg px-4 py-2 md:px-8 md:py-3"
+              onClick={onOpenModal}
+            >
+              <Send className="w-4 h-4 mr-2" />
+              {t("form.submit")}
+            </Button>
+          </div>
+          <ModalForm isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} formData={formData} handleInputChange={handleInputChange} handleSubmit={handleSubmit} isFormValid={isFormValid} t={t} />
         </div>
       </div>
     </div>
@@ -344,13 +216,125 @@ function ReportFormatter({ report }: { report: string }) {
   return (
     <div>
       {paragraphs.map((para, idx) => {
-        // If looks like a list, render as ul
-        if (/^[-*•]/.test(para)) {
-          const items = para.split(/\n/).map(line => line.replace(/^[-*•]\s*/, '').trim()).filter(Boolean)
-          return <ul key={idx} className="list-disc pl-6 mb-4">{items.map((item, i) => <li key={i}>{item}</li>)}</ul>
+        // Bold headings (lines ending with : or all caps)
+        if (/^[A-Z\s]+:|^([A-Z][a-z]+\s*){1,3}:$/.test(para) || /^[A-Z\s]+$/.test(para)) {
+          return <p key={idx} className="mb-4 font-bold text-purple-300">{para}</p>
         }
-        return <p key={idx} className="mb-4">{para}</p>
+        // If looks like a list, render as ul
+        if (/^[-*•0-9]/.test(para)) {
+          const items = para.split(/\n/).map(line => line.replace(/^[-*•0-9.]+\s*/, '').trim()).filter(Boolean)
+          return <ul key={idx} className="list-disc pl-6 mb-4">{items.map((item, i) => <li key={i} className="mb-1">{item}</li>)}</ul>
+        }
+        // Highlight key phrases
+        let formatted = para.replace(/(Recommendation|Summary|Key Takeaways|Conclusion|Important|Next Steps|Action Items)/gi, match => `<span class='font-bold text-purple-400'>${match}</span>`)
+        return <p key={idx} className="mb-4" dangerouslySetInnerHTML={{ __html: formatted }} />
       })}
+    </div>
+  )
+}
+
+// ModalForm component
+function ModalForm({ isOpen, onClose, formData, handleInputChange, handleSubmit, isFormValid, t }: any) {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 bg-black/80 backdrop-blur-md" onClick={onClose} />
+      <div className="relative bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl w-full max-w-md mx-auto p-6 z-10">
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white">✕</button>
+        <h2 className="text-2xl font-bold mb-2 text-white">{t("form.title")}</h2>
+        <p className="text-gray-400 mb-4">{t("form.subtitle")}</p>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="firstName" className="text-sm font-medium mb-2 block">
+                {t("form.firstName")} *
+              </Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  id="firstName"
+                  type="text"
+                  value={formData.firstName}
+                  onChange={e => handleInputChange("firstName", e.target.value)}
+                  className="pl-10 bg-gray-800/50 border-gray-700 text-white placeholder-gray-400 h-10 rounded-lg focus:border-purple-400 focus:ring-purple-400"
+                  placeholder={t("form.firstName")}
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="lastName" className="text-sm font-medium mb-2 block">
+                {t("form.lastName")} *
+              </Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  id="lastName"
+                  type="text"
+                  value={formData.lastName}
+                  onChange={e => handleInputChange("lastName", e.target.value)}
+                  className="pl-10 bg-gray-800/50 border-gray-700 text-white placeholder-gray-400 h-10 rounded-lg focus:border-purple-400 focus:ring-purple-400"
+                  placeholder={t("form.lastName")}
+                  required
+                />
+              </div>
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="phone" className="text-sm font-medium mb-2 block">
+              {t("form.phone")} *
+            </Label>
+            <div className="relative">
+              <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                id="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={e => handleInputChange("phone", e.target.value)}
+                className="pl-10 bg-gray-800/50 border-gray-700 text-white placeholder-gray-400 h-10 rounded-lg focus:border-purple-400 focus:ring-purple-400"
+                placeholder="+1 (555) 123-4567"
+                required
+              />
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="email" className="text-sm font-medium mb-2 block">
+              {t("form.email")} *
+            </Label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={e => handleInputChange("email", e.target.value)}
+                className="pl-10 bg-gray-800/50 border-gray-700 text-white placeholder-gray-400 h-10 rounded-lg focus:border-purple-400 focus:ring-purple-400"
+                placeholder="tu@empresa.com"
+                required
+              />
+            </div>
+          </div>
+          <div className="flex items-start space-x-3 p-3 rounded-lg border border-gray-700">
+            <Checkbox
+              id="terms"
+              checked={formData.acceptTerms}
+              onCheckedChange={checked => handleInputChange("acceptTerms", checked as boolean)}
+              className="mt-0.5 border-gray-600 data-[state=checked]:bg-purple-400 data-[state=checked]:border-purple-400"
+            />
+            <Label htmlFor="terms" className="text-xs text-gray-300 leading-relaxed cursor-pointer">
+              {t("form.terms")}
+            </Label>
+          </div>
+          <Button
+            type="submit"
+            disabled={!isFormValid}
+            className="w-full bg-white text-black hover:bg-gray-200 font-bold text-sm h-12 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+          >
+            <Send className="w-4 h-4 mr-2" />
+            {t("form.submit")}
+          </Button>
+        </form>
+      </div>
     </div>
   )
 }
