@@ -518,15 +518,11 @@ export default function QuizComponent({
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
         <motion.div
-          className="text-center mb-12"
+          className="text-center"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight ">
-            {t("quiz.title")}
-          </h1>
-          <p className="text-xl text-gray-400 font-medium">{t("quiz.subtitle")}</p>
           {Object.keys(savedAnswers).length > 0 && onReset && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="mt-4">
               <Button
