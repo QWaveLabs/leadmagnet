@@ -143,10 +143,10 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
                 href="https://qwavelabs.io/consultation"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center bg-gradient-to-r from-purple-600 to-purple-400 hover:from-purple-400 hover:to-purple-600 text-white font-bold text-sm md:text-lg px-3 py-2 md:px-8 md:py-3 rounded-xl transition-all duration-300 transform hover:scale-105 w-full mx-auto"
+                className="inline-flex items-center justify-center bg-gradient-to-r from-purple-600 to-purple-400 hover:from-purple-400 hover:to-purple-600 text-white font-bold text-sm md:text-lg px-3 py-2 md:px-8 md:py-3 rounded-xl transition-all duration-300 transform hover:scale-105 w-full mx-auto text-center"
               >
                 <Calendar className="w-5 h-5 mr-2 md:mr-3 text-purple-300" />
-                {t("confirmation.cta.button")}
+                Schedule Consultation
               </a>
               <Button
                 variant="outline"

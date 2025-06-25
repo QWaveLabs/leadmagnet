@@ -162,6 +162,7 @@ const questions = [
         "None of the above",
       ],
     },
+    multi: true,
   },
   {
     id: "q12",

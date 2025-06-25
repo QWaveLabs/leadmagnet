@@ -311,34 +311,31 @@ export default function HomePage() {
     
     debugLog("Starting form submission", { webhook: WEBHOOK_2_URL, data: submitData })
     
-    try {
-      const response = await fetch(WEBHOOK_2_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(submitData),
+    // Immediately navigate to confirmation
+    setCurrentStep("confirmation")
+    // Run API call in background
+    fetch(WEBHOOK_2_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(submitData),
+    })
+      .then(async (response) => {
+        debugLog("Form submission response", { 
+          status: response.status, 
+          ok: response.ok 
+        })
+        if (!response.ok) {
+          throw new Error(`Error HTTP: ${response.status}`)
+        }
+        const responseData = await response.json()
+        debugLog("Form submission successful", responseData)
+        // Optionally update state/UI here if needed
       })
-
-      debugLog("Form submission response", { 
-        status: response.status, 
-        ok: response.ok 
+      .catch((error) => {
+        console.error("Error al enviar formulario:", error)
+        debugLog("Form submission failed", error)
+        // Optionally update state/UI here if needed
       })
-
-      if (!response.ok) {
-        throw new Error(`Error HTTP: ${response.status}`)
-      }
-
-      const responseData = await response.json()
-      debugLog("Form submission successful", responseData)
-      
-      setCurrentStep("confirmation")
-      
-    } catch (error) {
-      console.error("Error al enviar formulario:", error)
-      debugLog("Form submission failed", error)
-      
-      // Continue to confirmation even on error for better UX
-      setCurrentStep("confirmation")
-    }
   }
 
   const handleResetQuiz = () => {
