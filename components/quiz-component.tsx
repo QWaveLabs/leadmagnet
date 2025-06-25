@@ -549,7 +549,7 @@ export default function QuizComponent({
               transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
               className="inline-block mb-6"
             >
-              <Loader2 className="w-16 h-16 text-[#FF4D00]" />
+              <Loader2 className="w-16 h-16 text-[#a259ff]" />
             </motion.div>
             <h3 className="text-2xl font-bold mb-4">{t("quiz.processing")}</h3>
             <p className="text-gray-400 text-lg">{t("quiz.analyzing")}</p>
@@ -565,7 +565,7 @@ export default function QuizComponent({
               </div>
               <div className="w-full bg-gray-800 rounded-full h-2">
                 <motion.div
-                  className="bg-gradient-to-r from-[#FF4D00] to-[#FF6F3C] h-2 rounded-full"
+                  className="bg-gradient-to-r from-[#a259ff] to-[#c084fc] h-2 rounded-full"
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}
                   transition={{ duration: 0.5 }}
@@ -601,10 +601,10 @@ export default function QuizComponent({
                           {current.id === "q11" && (
                             <div
                               onClick={() => toggleMultiSelectOption(option)}
-                              className="flex items-center space-x-4 p-4 rounded-xl border border-gray-700 hover:border-[#FF4D00] transition-all duration-300 cursor-pointer hover:bg-gray-800/30"
+                              className="flex items-center space-x-4 p-4 rounded-xl border border-gray-700 hover:border-[#a259ff] transition-all duration-300 cursor-pointer hover:bg-gray-800/30"
                             >
                               <Checkbox checked={checked} className="border-gray-600" />
-                              <Label className="text-lg font-medium cursor-pointer flex-1 group-hover:text-[#FF4D00] transition-colors">
+                              <Label className="text-lg font-medium cursor-pointer flex-1 group-hover:text-[#a259ff] transition-colors">
                                 {option}
                               </Label>
                             </div>
@@ -627,11 +627,11 @@ export default function QuizComponent({
                         transition={{ delay: index * 0.1 }}
                         className="group"
                       >
-                        <div className="flex items-center space-x-4 p-4 rounded-xl border border-gray-700 hover:border-[#FF4D00] transition-all duration-300 cursor-pointer hover:bg-gray-800/30">
+                        <div className="flex items-center space-x-4 p-4 rounded-xl border border-gray-700 hover:border-[#a259ff] transition-all duration-300 cursor-pointer hover:bg-gray-800/30">
                           <RadioGroupItem value={option} id={option} className="border-gray-600" />
                           <Label
                             htmlFor={option}
-                            className="text-lg font-medium cursor-pointer flex-1 group-hover:text-[#FF4D00] transition-colors"
+                            className="text-lg font-medium cursor-pointer flex-1 group-hover:text-[#a259ff] transition-colors"
                           >
                             {option}
                           </Label>

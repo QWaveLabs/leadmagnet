@@ -5,7 +5,6 @@ import QuizComponent from "@/components/quiz-component"
 import ResultsAndForm from "@/components/results-and-form"
 import ConfirmationDisplay from "@/components/confirmation-display"
 import CalendlyModal from "@/components/calendly-modal"
-import BackgroundEffects from "@/components/background-effects"
 import LanguageSwitcher from "@/components/language-switcher"
 import { useLanguage } from "@/contexts/language-context"
 
@@ -448,7 +447,6 @@ export default function HomePage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-black text-white relative overflow-hidden flex items-center justify-center">
-        <BackgroundEffects />
         <div className="relative z-10">
           <motion.div
             animate={{ rotate: 360 }}
@@ -465,7 +463,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
-      <BackgroundEffects />
       {isFirstQuestion && <LanguageSwitcher />} 
       <div className="relative z-10">
         <AnimatePresence mode="wait">

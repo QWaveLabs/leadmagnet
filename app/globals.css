@@ -4,25 +4,25 @@
 
 @layer base {
   :root {
-    --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
+    --background: 0 0% 0%; /* black */
+    --foreground: 0 0% 100%; /* white */
     --card: 0 0% 5%;
     --card-foreground: 0 0% 100%;
     --popover: 0 0% 5%;
     --popover-foreground: 0 0% 100%;
-    --primary: 0 0% 100%;
-    --primary-foreground: 0 0% 0%;
+    --primary: 270 100% 60%; /* purple */
+    --primary-foreground: 0 0% 100%; /* white */
     --secondary: 0 0% 10%;
     --secondary-foreground: 0 0% 100%;
     --muted: 0 0% 10%;
-    --muted-foreground: 0 0% 65%;
-    --accent: 0 0% 10%;
+    --muted-foreground: 270 100% 80%; /* light purple */
+    --accent: 270 100% 60%; /* purple */
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
+    --destructive: 340 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 20%;
+    --border: 270 100% 30%; /* purple border */
     --input: 0 0% 20%;
-    --ring: 14 100% 57%;
+    --ring: 270 100% 60%; /* purple */
     --radius: 0.75rem;
   }
 }
@@ -39,7 +39,7 @@
 
 @layer utilities {
   .text-gradient {
-    @apply bg-gradient-to-r from-[#FF4D00] to-[#FF6F3C] bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-purple-500 to-purple-300 bg-clip-text text-transparent;
   }
 }
 
@@ -68,6 +68,6 @@ html {
 
 /* Selection color */
 ::selection {
-  background: #ff4d00;
+  background: #a259ff; /* purple */
   color: white;
 }

@@ -130,7 +130,7 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
                           animate={{ rotate: 360 }}
                           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                         >
-                          <Loader2 className="w-6 h-6 text-[#FF4D00]" />
+                          <Loader2 className="w-6 h-6 text-purple-400" />
                         </motion.div>
                       ) : (
                         <div className="text-2xl font-bold text-white">
@@ -140,12 +140,12 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
                       )}
                     </div>
                   </div>
-                  <Award className="absolute -top-1 -right-1 w-6 h-6 text-[#FF4D00]" />
+                  <Award className="absolute -top-1 -right-1 w-6 h-6 text-purple-400" />
                 </div>
 
                 <div className="text-center">
                   <h3 className="text-lg font-bold mb-2 flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-[#FF4D00] mr-2" />
+                    <Sparkles className="w-5 h-5 text-purple-400 mr-2" />
                     {t("results.score")}
                   </h3>
                   <p className="text-sm text-gray-300">{!isLoadingScore && getLevelText()}</p>
@@ -155,7 +155,7 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
               {/* Report HTML */}
               <div className="max-h-96 overflow-y-auto min-h-[700px]">
                 <h3 className="text-lg font-bold mb-4 flex items-center">
-                  <CheckCircle className="w-5 h-5 text-[#FF4D00] mr-2" />
+                  <CheckCircle className="w-5 h-5 text-purple-400 mr-2" />
                   {t("results.analysis")}
                 </h3>
 
@@ -166,7 +166,7 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
                       transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                       className="mb-4"
                     >
-                      <Loader2 className="w-8 h-8 text-[#FF4D00]" />
+                      <Loader2 className="w-8 h-8 text-purple-400" />
                     </motion.div>
                     <p className="text-gray-400">{t("results.loading")}</p>
                   </div>
@@ -185,9 +185,9 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
                   <div className="text-center">
                   <Button
                     onClick={onOpenModal}
-                    className="bg-gradient-to-r from-[#FF4D00] to-[#FF6F3C] hover:from-[#FF6F3C] hover:to-[#FF4D00] text-white font-bold text-lg px-8 py-3 rounded-xl transition-all duration-300 transform hover:scale-105"
+                    className="bg-gradient-to-r from-purple-600 to-purple-400 hover:from-purple-400 hover:to-purple-600 text-white font-bold text-lg px-8 py-3 rounded-xl transition-all duration-300 transform hover:scale-105"
                   >
-                    <Calendar className="w-5 h-5 mr-3" />
+                    <Calendar className="w-5 h-5 mr-3 text-purple-300" />
                     {t("confirmation.cta.button")}
                   </Button>
                    <h2 className="text-2xl font-bold mt-2">{t("form.separation")}</h2>
@@ -224,7 +224,7 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
                         type="text"
                         value={formData.firstName}
                         onChange={(e) => handleInputChange("firstName", e.target.value)}
-                        className="pl-10 bg-gray-800/50 border-gray-700 text-white placeholder-gray-400 h-10 rounded-lg focus:border-[#FF4D00] focus:ring-[#FF4D00]"
+                        className="pl-10 bg-gray-800/50 border-gray-700 text-white placeholder-gray-400 h-10 rounded-lg focus:border-purple-400 focus:ring-purple-400"
                         placeholder={t("form.firstName")}
                         required
                       />
@@ -246,7 +246,7 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
                         type="text"
                         value={formData.lastName}
                         onChange={(e) => handleInputChange("lastName", e.target.value)}
-                        className="pl-10 bg-gray-800/50 border-gray-700 text-white placeholder-gray-400 h-10 rounded-lg focus:border-[#FF4D00] focus:ring-[#FF4D00]"
+                        className="pl-10 bg-gray-800/50 border-gray-700 text-white placeholder-gray-400 h-10 rounded-lg focus:border-purple-400 focus:ring-purple-400"
                         placeholder={t("form.lastName")}
                         required
                       />
@@ -266,7 +266,7 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => handleInputChange("phone", e.target.value)}
-                      className="pl-10 bg-gray-800/50 border-gray-700 text-white placeholder-gray-400 h-10 rounded-lg focus:border-[#FF4D00] focus:ring-[#FF4D00]"
+                      className="pl-10 bg-gray-800/50 border-gray-700 text-white placeholder-gray-400 h-10 rounded-lg focus:border-purple-400 focus:ring-purple-400"
                       placeholder="+1 (555) 123-4567"
                       required
                     />
@@ -284,7 +284,7 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
                       type="email"
                       value={formData.email}
                       onChange={(e) => handleInputChange("email", e.target.value)}
-                      className="pl-10 bg-gray-800/50 border-gray-700 text-white placeholder-gray-400 h-10 rounded-lg focus:border-[#FF4D00] focus:ring-[#FF4D00]"
+                      className="pl-10 bg-gray-800/50 border-gray-700 text-white placeholder-gray-400 h-10 rounded-lg focus:border-purple-400 focus:ring-purple-400"
                       placeholder="tu@empresa.com"
                       required
                     />
@@ -302,7 +302,7 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
                     id="terms"
                     checked={formData.acceptTerms}
                     onCheckedChange={(checked) => handleInputChange("acceptTerms", checked as boolean)}
-                    className="mt-0.5 border-gray-600 data-[state=checked]:bg-[#FF4D00] data-[state=checked]:border-[#FF4D00]"
+                    className="mt-0.5 border-gray-600 data-[state=checked]:bg-purple-400 data-[state=checked]:border-purple-400"
                   />
                   <Label htmlFor="terms" className="text-xs text-gray-300 leading-relaxed cursor-pointer">
                     {t("form.terms")}
