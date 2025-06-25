@@ -87,14 +87,11 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
       <div className="w-full max-w-6xl">
         {/* Header */}
         <motion.div
-          className="text-center mb-12"
+          className="text-center"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight">{t("results.title")}</h1>
-          <p className="text-xl text-gray-400 font-medium">{t("results.subtitle")}</p>
-
           {/* Botón de reset */}
           {onReset && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="mt-4">
