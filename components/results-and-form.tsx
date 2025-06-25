@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -85,16 +85,27 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
   // Animated loading messages for report
   const loadingMessages = [t("results.loading"), "Almost there...", "Just one sec..."];
   const [loadingIndex, setLoadingIndex] = useState(0);
+  const reportRef = useRef<HTMLDivElement>(null);
+  // Post height to parent for iframe resizing
   useEffect(() => {
-    if (isLoadingReport) {
-      const interval = setInterval(() => {
-        setLoadingIndex((prev) => (prev + 1) % loadingMessages.length);
-      }, 2500);
-      return () => clearInterval(interval);
-    } else {
-      setLoadingIndex(0);
+    function postHeight() {
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: 'iframeHeight', height: document.body.scrollHeight }, '*');
+      }
     }
-  }, [isLoadingReport]);
+    postHeight();
+    window.addEventListener('resize', postHeight);
+    return () => window.removeEventListener('resize', postHeight);
+  }, []);
+  useEffect(() => {
+    if (!isLoadingReport) {
+      setTimeout(() => {
+        if (window.parent !== window) {
+          window.parent.postMessage({ type: 'iframeHeight', height: document.body.scrollHeight }, '*');
+        }
+      }, 300);
+    }
+  }, [isLoadingReport, reportHTML]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -164,7 +175,7 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
               </div>
 
               {/* Report HTML */}
-              <div className="max-h-96 overflow-y-auto min-h-[700px] p-1 md:p-4 w-full max-w-3xl mx-auto">
+              <div ref={reportRef} className="w-full md:max-w-3xl md:mx-auto min-h-[700px]">
                 <h3 className="text-lg font-bold mb-4 flex items-center">
                   <CheckCircle className="w-5 h-5 text-purple-400 mr-2" />
                   {t("results.analysis")}
@@ -184,7 +195,7 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
                     </p>
                   </div>
                 ) : (
-                  <div className="bg-black border border-gray-800 rounded-xl p-3 md:p-6 text-gray-100 font-sans text-base leading-relaxed whitespace-pre-line shadow-lg">
+                  <div className="text-gray-100 font-sans text-base leading-relaxed whitespace-pre-line">
                     {reportHTML
                       ? <ReportFormatter report={reportHTML} />
                       : <p>{t("results.error")}</p>}
@@ -194,19 +205,19 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
             </Card>
           </motion.div>
 
-          <div className="flex flex-col md:flex-row gap-4 justify-center items-center mt-6 w-full">
+          <div className="flex flex-col gap-4 justify-center items-center mt-6 w-full md:max-w-md md:mx-auto">
             <a
               href="https://qwavelabs.io/consultation"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center bg-gradient-to-r from-purple-600 to-purple-400 hover:from-purple-400 hover:to-purple-600 text-white font-bold text-base md:text-lg px-4 py-2 md:px-8 md:py-3 rounded-xl transition-all duration-300 transform hover:scale-105 w-full md:w-auto mx-auto"
+              className="inline-flex items-center justify-center bg-gradient-to-r from-purple-600 to-purple-400 hover:from-purple-400 hover:to-purple-600 text-white font-bold text-base md:text-lg px-4 py-2 md:px-8 md:py-3 rounded-xl transition-all duration-300 transform hover:scale-105 w-full mx-auto"
             >
               <Calendar className="w-5 h-5 mr-2 md:mr-3 text-purple-300" />
               {t("confirmation.cta.button")}
             </a>
             <Button
               variant="outline"
-              className="w-full md:w-auto border-gray-700 text-gray-400 hover:bg-gray-800 hover:text-white text-base md:text-lg px-4 py-2 md:px-8 md:py-3"
+              className="w-full border-gray-700 text-gray-400 hover:bg-gray-800 hover:text-white text-base md:text-lg px-4 py-2 md:px-8 md:py-3"
               onClick={onOpenModal}
             >
               <Send className="w-4 h-4 mr-2" />
@@ -355,7 +366,7 @@ function ModalForm({ isOpen, onClose, formData, handleInputChange, handleSubmit,
             className="w-full bg-white text-black hover:bg-gray-200 font-bold text-sm h-12 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
           >
             <Send className="w-4 h-4 mr-2" />
-            {submitting ? t("form.submitting") || "Submitting..." : t("form.submit")}
+            {submitting ? "Sending report..." : t("form.submit")}
           </Button>
         </form>
       </div>
