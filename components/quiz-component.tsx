@@ -570,13 +570,13 @@ export default function QuizComponent({
               exit={{ opacity: 0, x: -50 }}
               transition={{ duration: 0.4 }}
             >
-              <Card className="bg-gray-900/50 border-gray-800 rounded-2xl p-8 shadow-xl backdrop-blur-sm">
-                <h2 className="text-2xl md:text-3xl font-bold mb-8 leading-tight">
+              <Card className="bg-gray-900/50 border-gray-800 rounded-2xl p-3 md:p-8 shadow-xl backdrop-blur-sm">
+                <h2 className="text-lg md:text-2xl font-bold mb-4 md:mb-8 leading-tight">
                   {current.question[language]}
                 </h2>
 
                 {isMultiSelect ? (
-                  <div className="space-y-4">
+                  <div className="space-y-2 md:space-y-4">
                     {current.options[language].map((option, index) => {
                       const selected = answers[current.id]?.split("||") || []
                       const checked = selected.includes(option)
@@ -588,17 +588,15 @@ export default function QuizComponent({
                           transition={{ delay: index * 0.1 }}
                           className="group"
                         >
-                          {current.id === "q11" && (
-                            <div
-                              onClick={() => toggleMultiSelectOption(option)}
-                              className="flex items-center space-x-4 p-4 rounded-xl border border-gray-700 hover:border-[#a259ff] transition-all duration-300 cursor-pointer hover:bg-gray-800/30"
-                            >
-                              <Checkbox checked={checked} className="border-gray-600" />
-                              <Label className="text-lg font-medium cursor-pointer flex-1 group-hover:text-[#a259ff] transition-colors">
-                                {option}
-                              </Label>
-                            </div>
-                          )}
+                          <div
+                            onClick={() => toggleMultiSelectOption(option)}
+                            className={`flex items-center space-x-3 md:space-x-4 p-2 md:p-4 rounded-xl border border-gray-700 hover:border-[#a259ff] transition-all duration-300 cursor-pointer hover:bg-gray-800/30 ${checked ? 'bg-gray-800/60' : ''}`}
+                          >
+                            <span className={`inline-block w-5 h-5 md:w-6 md:h-6 rounded border border-gray-600 flex items-center justify-center transition-colors duration-200 ${checked ? 'bg-white' : 'bg-transparent'}`}></span>
+                            <Label className="text-base md:text-lg font-medium cursor-pointer flex-1 group-hover:text-[#a259ff] transition-colors">
+                              {option}
+                            </Label>
+                          </div>
                         </motion.div>
                       )
                     })}
@@ -607,27 +605,33 @@ export default function QuizComponent({
                   <RadioGroup
                     value={answers[current.id] || ""}
                     onValueChange={handleAnswer}
-                    className="space-y-4"
+                    className="space-y-2 md:space-y-4"
                   >
-                    {current.options[language].map((option, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="group"
-                      >
-                        <div className="flex items-center space-x-4 p-4 rounded-xl border border-gray-700 hover:border-[#a259ff] transition-all duration-300 cursor-pointer hover:bg-gray-800/30">
-                          <RadioGroupItem value={option} id={option} className="border-gray-600" />
-                          <Label
-                            htmlFor={option}
-                            className="text-lg font-medium cursor-pointer flex-1 group-hover:text-[#a259ff] transition-colors"
+                    {current.options[language].map((option, index) => {
+                      const checked = answers[current.id] === option;
+                      return (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className="group"
+                        >
+                          <div
+                            className={`flex items-center space-x-3 md:space-x-4 p-2 md:p-4 rounded-xl border border-gray-700 hover:border-[#a259ff] transition-all duration-300 cursor-pointer hover:bg-gray-800/30 ${checked ? 'bg-gray-800/60' : ''}`}
+                            onClick={() => handleAnswer(option)}
                           >
-                            {option}
-                          </Label>
-                        </div>
-                      </motion.div>
-                    ))}
+                            <span className={`inline-block w-5 h-5 md:w-6 md:h-6 rounded-full border border-gray-600 flex items-center justify-center transition-colors duration-200 ${checked ? 'bg-white' : 'bg-transparent'}`}></span>
+                            <Label
+                              htmlFor={option}
+                              className="text-base md:text-lg font-medium cursor-pointer flex-1 group-hover:text-[#a259ff] transition-colors"
+                            >
+                              {option}
+                            </Label>
+                          </div>
+                        </motion.div>
+                      )
+                    })}
                   </RadioGroup>
                 )}
               </Card>
