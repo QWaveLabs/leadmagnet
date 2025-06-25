@@ -463,7 +463,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
-      {isFirstQuestion && <LanguageSwitcher />} 
+      {currentStep === "quiz" && isFirstQuestion && <LanguageSwitcher />} 
       <div className="relative z-10">
         <AnimatePresence mode="wait">
           

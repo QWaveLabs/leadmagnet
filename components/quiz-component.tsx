@@ -221,6 +221,7 @@ const questions = [
       es: ["Anuncios", "Referencias", "Alcance en frío", "Orgánico", "Redes Sociales"],
       en: ["Ads", "Referrals", "Cold outreach", "Organic", "Social Media"],
     },
+    multi: true,
   },
   {
     id: "q15",
@@ -289,6 +290,7 @@ const questions = [
         "We don't produce content regularly",
       ],
     },
+    multi: true,
   },
   {
     id: "q19",
@@ -413,8 +415,8 @@ const questions = [
       en: "Do you have a budget allocated for tech improvements or AI in the next 3 months?",
     },
     options: {
-      es: ["No asignado", "Menos de $1K", "$1K–$5K", "$5K+"],
-      en: ["Not allocated", "Less than $1K", "$1K–$5K", "$5K+"],
+      es: ["No asignado", "Menos de $10k", "$10k–$25k", "$25k+"],
+      en: ["Not allocated", "Less than $10k", "$10-$25k", "$25k+"],
     },
   },
   {
@@ -442,7 +444,7 @@ export default function QuizComponent({
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const current = questions[currentQuestion]
-  const isMultiSelect = current.id === "q11"
+  const isMultiSelect = !!current.multi;
 
   useEffect(() => {
     if (Object.keys(savedAnswers).length > 0) {

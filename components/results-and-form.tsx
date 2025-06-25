@@ -134,6 +134,32 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
           
         </motion.div>
 
+        {/* CTA Section - moved above analysis */}
+        <div className="w-full md:max-w-2xl mx-auto mb-4">
+          <div className="bg-gradient-to-r from-purple-900/10 to-purple-400/10 border border-purple-400/20 rounded-xl p-3 md:p-6 flex flex-col items-center shadow-sm">
+            <h2 className="text-base md:text-lg font-bold text-center mb-2 md:mb-4 text-purple-400">Ready for the next step?</h2>
+            <div className="flex flex-col gap-2 w-full max-w-xs mx-auto">
+              <a
+                href="https://qwavelabs.io/consultation"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center bg-gradient-to-r from-purple-600 to-purple-400 hover:from-purple-400 hover:to-purple-600 text-white font-bold text-sm md:text-lg px-3 py-2 md:px-8 md:py-3 rounded-xl transition-all duration-300 transform hover:scale-105 w-full mx-auto"
+              >
+                <Calendar className="w-5 h-5 mr-2 md:mr-3 text-purple-300" />
+                {t("confirmation.cta.button")}
+              </a>
+              <Button
+                variant="outline"
+                className="w-full border-gray-700 text-gray-400 hover:bg-gray-800 hover:text-white text-sm md:text-lg px-3 py-2 md:px-8 md:py-3"
+                onClick={onOpenModal}
+              >
+                <Send className="w-4 h-4 mr-2" />
+                {t("form.submit")}
+              </Button>
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols gap-8">
           {/* Results Section */}
           <motion.div
@@ -205,30 +231,6 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
             </Card>
           </motion.div>
 
-          <div className="w-full md:max-w-2xl mx-auto mb-4">
-            <div className="bg-gradient-to-r from-purple-900/10 to-purple-400/10 border border-purple-400/20 rounded-xl p-3 md:p-6 flex flex-col items-center shadow-sm">
-              <h2 className="text-base md:text-lg font-bold text-center mb-2 md:mb-4 text-purple-400">Ready for the next step?</h2>
-              <div className="flex flex-col gap-2 w-full max-w-xs mx-auto">
-                <a
-                  href="https://qwavelabs.io/consultation"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center bg-gradient-to-r from-purple-600 to-purple-400 hover:from-purple-400 hover:to-purple-600 text-white font-bold text-sm md:text-lg px-3 py-2 md:px-8 md:py-3 rounded-xl transition-all duration-300 transform hover:scale-105 w-full mx-auto"
-                >
-                  <Calendar className="w-5 h-5 mr-2 md:mr-3 text-purple-300" />
-                  {t("confirmation.cta.button")}
-                </a>
-                <Button
-                  variant="outline"
-                  className="w-full border-gray-700 text-gray-400 hover:bg-gray-800 hover:text-white text-sm md:text-lg px-3 py-2 md:px-8 md:py-3"
-                  onClick={onOpenModal}
-                >
-                  <Send className="w-4 h-4 mr-2" />
-                  {t("form.submit")}
-                </Button>
-              </div>
-            </div>
-          </div>
           <ModalForm isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} formData={formData} handleInputChange={handleInputChange} handleSubmit={handleSubmit} isFormValid={isFormValid} t={t} />
         </div>
       </div>
