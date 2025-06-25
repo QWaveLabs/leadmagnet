@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Calendar, CheckCircle, Mail, Clock, RotateCcw } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
-import React from "react"
+import React, { useEffect } from "react"
 
 interface ConfirmationDisplayProps {
   onOpenModal: () => void
@@ -15,6 +15,10 @@ interface ConfirmationDisplayProps {
 
 const ConfirmationDisplay: React.FC<ConfirmationDisplayProps> = ({ onOpenModal, onReset, reportHTML }) => {
   const { t } = useLanguage()
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">

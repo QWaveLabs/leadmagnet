@@ -82,6 +82,20 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
     return t("results.level.exceptional")
   }
 
+  // Animated loading messages for report
+  const loadingMessages = [t("results.loading"), "Almost there...", "Just one sec..."];
+  const [loadingIndex, setLoadingIndex] = useState(0);
+  useEffect(() => {
+    if (isLoadingReport) {
+      const interval = setInterval(() => {
+        setLoadingIndex((prev) => (prev + 1) % loadingMessages.length);
+      }, 2500);
+      return () => clearInterval(interval);
+    } else {
+      setLoadingIndex(0);
+    }
+  }, [isLoadingReport]);
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-6xl">
@@ -150,7 +164,7 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
               </div>
 
               {/* Report HTML */}
-              <div className="max-h-96 overflow-y-auto min-h-[700px] p-3 md:p-6">
+              <div className="max-h-96 overflow-y-auto min-h-[700px] p-1 md:p-4 w-full max-w-3xl mx-auto">
                 <h3 className="text-lg font-bold mb-4 flex items-center">
                   <CheckCircle className="w-5 h-5 text-purple-400 mr-2" />
                   {t("results.analysis")}
@@ -163,9 +177,11 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
                       transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                       className="mb-4"
                     >
-                      <Loader2 className="w-8 h-8 text-purple-400" />
+                      <Loader2 className="w-12 h-12 text-purple-400 animate-spin" />
                     </motion.div>
-                    <p className="text-gray-400">{t("results.loading")}</p>
+                    <p className="text-gray-400 text-lg font-semibold mb-2 min-h-[2.5rem] transition-all duration-500">
+                      {loadingMessages[loadingIndex]}
+                    </p>
                   </div>
                 ) : (
                   <div className="bg-black border border-gray-800 rounded-xl p-3 md:p-6 text-gray-100 font-sans text-base leading-relaxed whitespace-pre-line shadow-lg">
@@ -178,12 +194,12 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
             </Card>
           </motion.div>
 
-          <div className="flex flex-col md:flex-row gap-4 justify-center items-center mt-6">
+          <div className="flex flex-col md:flex-row gap-4 justify-center items-center mt-6 w-full">
             <a
               href="https://qwavelabs.io/consultation"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center bg-gradient-to-r from-purple-600 to-purple-400 hover:from-purple-400 hover:to-purple-600 text-white font-bold text-base md:text-lg px-4 py-2 md:px-8 md:py-3 rounded-xl transition-all duration-300 transform hover:scale-105 w-full md:w-auto"
+              className="inline-flex items-center justify-center bg-gradient-to-r from-purple-600 to-purple-400 hover:from-purple-400 hover:to-purple-600 text-white font-bold text-base md:text-lg px-4 py-2 md:px-8 md:py-3 rounded-xl transition-all duration-300 transform hover:scale-105 w-full md:w-auto mx-auto"
             >
               <Calendar className="w-5 h-5 mr-2 md:mr-3 text-purple-300" />
               {t("confirmation.cta.button")}
@@ -235,7 +251,15 @@ function ReportFormatter({ report }: { report: string }) {
 
 // ModalForm component
 function ModalForm({ isOpen, onClose, formData, handleInputChange, handleSubmit, isFormValid, t }: any) {
+  const [submitting, setSubmitting] = useState(false);
   if (!isOpen) return null;
+  const onModalSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (submitting || !isFormValid) return;
+    setSubmitting(true);
+    handleSubmit(e);
+    setTimeout(() => setSubmitting(false), 2000); // re-enable after 2s in case of error
+  };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="fixed inset-0 bg-black/80 backdrop-blur-md" onClick={onClose} />
@@ -243,7 +267,7 @@ function ModalForm({ isOpen, onClose, formData, handleInputChange, handleSubmit,
         <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white">✕</button>
         <h2 className="text-2xl font-bold mb-2 text-white">{t("form.title")}</h2>
         <p className="text-gray-400 mb-4">{t("form.subtitle")}</p>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={onModalSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="firstName" className="text-sm font-medium mb-2 block">
@@ -327,11 +351,11 @@ function ModalForm({ isOpen, onClose, formData, handleInputChange, handleSubmit,
           </div>
           <Button
             type="submit"
-            disabled={!isFormValid}
+            disabled={!isFormValid || submitting}
             className="w-full bg-white text-black hover:bg-gray-200 font-bold text-sm h-12 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
           >
             <Send className="w-4 h-4 mr-2" />
-            {t("form.submit")}
+            {submitting ? t("form.submitting") || "Submitting..." : t("form.submit")}
           </Button>
         </form>
       </div>
