@@ -446,7 +446,7 @@ export default function QuizComponent({
   const navDirection = useRef<'next' | 'prev' | null>(null)
 
   const current = questions[currentQuestion]
-  const isMultiSelect = !!current.multi;
+  const isMultiSelect = !!current?.multi;
 
   useEffect(() => {
     if (Object.keys(savedAnswers).length > 0) {
