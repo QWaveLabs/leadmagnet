@@ -48,6 +48,7 @@ export default function HomePage() {
 
   // Cargar datos del localStorage al inicializar
   useEffect(() => {
+    clearStorage(); // Always start fresh on page load
     const loadFromStorage = () => {
       try {
         debugLog("Loading from localStorage", "Starting...")
