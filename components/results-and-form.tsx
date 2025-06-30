@@ -140,9 +140,8 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
             <h2 className="text-base md:text-lg font-bold text-center mb-2 md:mb-4 text-purple-400">Ready for the next step?</h2>
             <div className="flex flex-col gap-2 w-full max-w-xs mx-auto">
               <a
-                href="https://qwavelabs.io/consultation"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="#"
+                onClick={e => { e.preventDefault(); if (window.top) window.top.location = 'https://qwavelabs.io/consultation'; }}
                 className="inline-flex items-center justify-center bg-gradient-to-r from-purple-600 to-purple-400 hover:from-purple-400 hover:to-purple-600 text-white font-bold text-sm md:text-lg px-3 py-2 md:px-8 md:py-3 rounded-xl transition-all duration-300 transform hover:scale-105 w-full mx-auto text-center"
               >
                 <Calendar className="w-5 h-5 mr-2 md:mr-3 text-purple-300" />
@@ -167,7 +166,7 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <Card className="bg-black border-gray-800 rounded-2xl p-6 shadow-xl h-full min-h-[700px]">
+            <Card className={`bg-black border-gray-800 rounded-2xl shadow-xl h-full min-h-[700px] ${!isLoadingReport ? 'p-0' : 'p-6'}`}>
               {/* Score Display */}
               <div className="flex flex-col items-center mb-6 p-4 bg-black rounded-xl border border-gray-800">
                 <div className="relative mb-4">
@@ -201,7 +200,7 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
               </div>
 
               {/* Report HTML */}
-              <div ref={reportRef} className="w-full md:max-w-3xl md:mx-auto min-h-[700px]">
+              <div ref={reportRef} className={`w-full min-h-[700px] ${!isLoadingReport ? 'p-0' : 'md:max-w-3xl md:mx-auto'}`} style={!isLoadingReport ? {padding: 0, maxWidth: '100%'} : {}}>
                 <h3 className="text-base md:text-lg font-bold mb-4 flex items-center">
                   <CheckCircle className="w-5 h-5 text-purple-400 mr-2" />
                   {t("results.analysis")}
@@ -221,7 +220,7 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
                     </p>
                   </div>
                 ) : (
-                  <div className="text-gray-100 font-sans text-sm md:text-base leading-relaxed whitespace-pre-line">
+                  <div className="text-gray-100 font-sans text-sm md:text-base leading-relaxed whitespace-pre-line w-full" style={{padding: 0, maxWidth: '100%'}}>
                     {reportHTML
                       ? <ReportFormatter report={reportHTML} />
                       : <p>{t("results.error")}</p>}
@@ -279,14 +278,14 @@ function ModalForm({ isOpen, onClose, formData, handleInputChange, handleSubmit,
     setTimeout(() => setSubmitting(false), 2000); // re-enable after 2s in case of error
   };
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2">
       <div className="fixed inset-0 bg-black/80 backdrop-blur-md" onClick={onClose} />
-      <div className="relative bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl w-full max-w-md mx-auto p-4 md:p-6 z-10 text-sm md:text-base">
+      <div className="relative bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl w-full max-w-md mx-auto p-2 md:p-4 z-10 text-sm md:text-base max-h-[90vh] flex flex-col">
         <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white">✕</button>
         <h2 className="text-base md:text-2xl font-bold mb-2 text-white">{t("form.title")}</h2>
         <p className="text-gray-400 mb-4 text-xs md:text-base">{t("form.subtitle")}</p>
-        <form onSubmit={onModalSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={onModalSubmit} className="space-y-3 overflow-y-auto" style={{maxHeight: '60vh'}}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <Label htmlFor="firstName" className="text-sm font-medium mb-2 block">
                 {t("form.firstName")} *
@@ -356,7 +355,7 @@ function ModalForm({ isOpen, onClose, formData, handleInputChange, handleSubmit,
               />
             </div>
           </div>
-          <div className="flex items-start space-x-3 p-3 rounded-lg border border-gray-700">
+          <div className="flex items-start space-x-3 p-2 rounded-lg border border-gray-700">
             <Checkbox
               id="terms"
               checked={formData.acceptTerms}
