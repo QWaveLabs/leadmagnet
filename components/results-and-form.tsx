@@ -166,7 +166,7 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <Card className={`bg-black border-gray-800 rounded-2xl shadow-xl h-full min-h-[700px] ${!isLoadingReport ? 'p-0' : 'p-6'}`}>
+            <Card className="bg-black border-gray-800 rounded-2xl shadow-xl h-full min-h-[700px] p-2 md:p-6">
               {/* Score Display */}
               <div className="flex flex-col items-center mb-6 p-4 bg-black rounded-xl border border-gray-800">
                 <div className="relative mb-4">
@@ -175,7 +175,7 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
                       {isLoadingScore ? (
                         <motion.div
                           animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                         >
                           <Loader2 className="w-6 h-6 text-purple-400" />
                         </motion.div>
@@ -193,24 +193,24 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
                 <div className="text-center">
                   <h3 className="text-lg font-bold mb-2 flex items-center justify-center">
                     <Sparkles className="w-5 h-5 text-purple-400 mr-2" />
-                    {t("results.score")}
+                    {t('results.score')}
                   </h3>
                   <p className="text-sm text-gray-300">{!isLoadingScore && getLevelText()}</p>
                 </div>
               </div>
 
               {/* Report HTML */}
-              <div ref={reportRef} className={`w-full min-h-[700px] ${!isLoadingReport ? 'p-0' : 'md:max-w-3xl md:mx-auto'}`} style={!isLoadingReport ? {padding: 0, maxWidth: '100%'} : {}}>
+              <div ref={reportRef} className="w-full min-h-[700px] p-2 md:p-6">
                 <h3 className="text-base md:text-lg font-bold mb-4 flex items-center">
                   <CheckCircle className="w-5 h-5 text-purple-400 mr-2" />
-                  {t("results.analysis")}
+                  {t('results.analysis')}
                 </h3>
 
                 {isLoadingReport ? (
                   <div className="flex flex-col items-center justify-center h-64">
                     <motion.div
                       animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                       className="mb-4"
                     >
                       <Loader2 className="w-12 h-12 text-purple-400 animate-spin" />
@@ -220,10 +220,10 @@ export default function ResultsAndForm({ score, reportHTML, onSubmit, onReset, i
                     </p>
                   </div>
                 ) : (
-                  <div className="text-gray-100 font-sans text-sm md:text-base leading-relaxed whitespace-pre-line w-full" style={{padding: 0, maxWidth: '100%'}}>
+                  <div className="text-gray-100 font-sans text-sm md:text-base leading-relaxed whitespace-pre-line w-full">
                     {reportHTML
                       ? <ReportFormatter report={reportHTML} />
-                      : <p>{t("results.error")}</p>}
+                      : <p>{t('results.error')}</p>}
                   </div>
                 )}
               </div>
