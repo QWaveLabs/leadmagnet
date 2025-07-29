@@ -96,7 +96,7 @@ export default function LeadForm({ onSubmit, onReset, isLoading }: LeadFormProps
                 disabled={isLoading}
               >
                 <RotateCcw className="w-4 h-4 mr-2" />
-                {t("form.reset") || "Start Over"}
+                {t("quiz.reset")}
               </Button>
             </motion.div>
           )}
