@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import QuizComponent from "@/components/quiz-component"
-import ResultsAndForm from "@/components/results-and-form"
+import LeadForm from "@/components/lead-form"
 import ConfirmationDisplay from "@/components/confirmation-display"
 import CalendlyModal from "@/components/calendly-modal"
 import LanguageSwitcher from "@/components/language-switcher"
@@ -27,7 +27,7 @@ const debugLog = (action: string, data: any) => {
 }
 
 export default function HomePage() {
-  const [currentStep, setCurrentStep] = useState<"quiz" | "results-form" | "confirmation">("quiz")
+  const [currentStep, setCurrentStep] = useState<"quiz" | "lead-form" | "confirmation">("quiz")
   const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({})
   const [isFirstQuestion, setIsFirstQuestion] = useState(true)
   const [quizResults, setQuizResults] = useState<{
@@ -54,8 +54,8 @@ export default function HomePage() {
         debugLog("Loading from localStorage", "Starting...")
         
         const savedStep = localStorage.getItem(STORAGE_KEYS.CURRENT_STEP)
-        if (savedStep && ["quiz", "results-form", "confirmation"].includes(savedStep)) {
-          setCurrentStep(savedStep as "quiz" | "results-form" | "confirmation")
+        if (savedStep && ["quiz", "lead-form", "confirmation"].includes(savedStep)) {
+          setCurrentStep(savedStep as "quiz" | "lead-form" | "confirmation")
           debugLog("Loaded step from storage", savedStep)
         }
         
@@ -127,27 +127,35 @@ export default function HomePage() {
     setQuizAnswers(answers)
     debugLog("Quiz completed with answers", answers)
     
-    // FIRST CALL - Get Score (Webhook 3) - Fast response expected
+    // Navigate directly to lead form - user must enter info before getting results
+    setCurrentStep("lead-form")
+    debugLog("Navigation to lead-form", "User must enter info to get detailed report")
+  }
+
+  const handleFormSubmit = async (leadData: any) => {
+    saveToStorage(STORAGE_KEYS.FORM_DATA, leadData)
+    
+    debugLog("Starting lead form submission with score/report generation", { leadData, answers: quizAnswers })
+    
+    // Show loading state
     setIsLoadingScore(true)
-    debugLog("Starting score request", { webhook: WEBHOOK_3_URL, answers, lang: language })
+    setIsLoadingReport(true)
     
     try {
+      // FIRST CALL - Get Score (Webhook 3)
+      debugLog("Starting score request", { webhook: WEBHOOK_3_URL, answers: quizAnswers, lang: language })
+      
       const scoreResponse = await fetch(WEBHOOK_3_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          answers,
+          answers: quizAnswers,
           lang: language || "en"
         }),
       })
 
-      debugLog("Score response received", { 
-        status: scoreResponse.status, 
-        ok: scoreResponse.ok 
-      })
-
       if (!scoreResponse.ok) {
-        throw new Error(`Error HTTP: ${scoreResponse.status}`)
+        throw new Error(`Score Error HTTP: ${scoreResponse.status}`)
       }
 
       const scoreData = await scoreResponse.json()
@@ -156,187 +164,100 @@ export default function HomePage() {
       const calculatedScore = scoreData.score || 0
       setScore(calculatedScore)
       setIsLoadingScore(false)
-      
-      // Navigate to results immediately with score
-      setCurrentStep("results-form")
-      debugLog("Navigation to results-form with score", calculatedScore)
 
-      // SECOND CALL - Get Report (Webhook 1) - Background loading
-      setIsLoadingReport(true)
+      // SECOND CALL - Get Report (Webhook 1)
       debugLog("Starting report request", { 
         webhook: WEBHOOK_1_URL, 
-        answers, 
+        answers: quizAnswers, 
         lang: language, 
         score: calculatedScore 
       })
 
-      try {
-        const reportResponse = await fetch(WEBHOOK_1_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            answers,
-            lang: language,
-            score: calculatedScore
-          })
+      const reportResponse = await fetch(WEBHOOK_1_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          answers: quizAnswers,
+          lang: language,
+          score: calculatedScore
         })
+      })
 
-        const reportText = await reportResponse.text()
+      const reportText = await reportResponse.text()
+      let finalReportHTML = ""
 
+      try {
+        const parsed = JSON.parse(reportText)
+        debugLog("Report data parsed", parsed)
+        finalReportHTML = parsed.reportHTML || ""
+      } catch (parseError) {
+        console.error("Error parsing report JSON:", parseError)
         try {
-          const parsed = JSON.parse(reportText)
-          debugLog("Report data parsed", parsed)
-          setReportHTML(parsed.reportHTML || "")
-          setQuizResults({
-            score: calculatedScore,
-            reportHTML: parsed.reportHTML || ""
-          })
-          setIsLoadingReport(false)
-        } catch (parseError) {
-          console.error("Error parsing report JSON:", parseError)
-          debugLog("Trying to clean the response and parse again", parseError)
-          try {
-            const cleanedResponse = reportText
-              .replace(/\n/g, '')
-              .replace(/\r/g, '')
-              .replace(/\\/g, '\\\\')
-              .replace(/\\"/g, '\\"')
+          const cleanedResponse = reportText
+            .replace(/\n/g, '')
+            .replace(/\r/g, '')
+            .replace(/\\/g, '\\\\')
+            .replace(/\\"/g, '\\"')
 
-            const fallbackParsed = JSON.parse(cleanedResponse)
-            setReportHTML(fallbackParsed.reportHTML || "")
-            setQuizResults({
-              score: calculatedScore,
-              reportHTML: fallbackParsed.reportHTML || ""
-            })
-            setIsLoadingReport(false)
-          } catch (secondError) {
-            console.error("Second parsing attempt failed:", secondError)
-            const reportMatch = reportText.match(/"reportHTML":\s*"([\s\S]+?)"(?=\n?})/)
-            const fallbackReport = reportMatch ? reportMatch[1].replace(/\\"/g, '"') : ""
-            setReportHTML(fallbackReport)
-            setQuizResults({
-              score: calculatedScore,
-              reportHTML: fallbackReport
-            })
-            setIsLoadingReport(false)
-          }
+          const fallbackParsed = JSON.parse(cleanedResponse)
+          finalReportHTML = fallbackParsed.reportHTML || ""
+        } catch (secondError) {
+          console.error("Second parsing attempt failed:", secondError)
+          const reportMatch = reportText.match(/"reportHTML":\s*"([\s\S]+?)"(?=\n?})/)
+          finalReportHTML = reportMatch ? reportMatch[1].replace(/\\"/g, '"') : ""
         }
-      } catch (reportError) {
-        console.error("Error al obtener el reporte:", reportError)
-        debugLog("Report request failed, using fallback", reportError)
-        
-        // MOCK DATA FALLBACK - Commented out for production
-        /*
-        const simulatedReportHTML = generateSimulatedReport(answers, calculatedScore)
-        setReportHTML(simulatedReportHTML)
-        setQuizResults({
-          score: calculatedScore,
-          reportHTML: simulatedReportHTML
-        })
-        */
-        
-        setIsLoadingReport(false)
       }
-
-    } catch (scoreError) {
-      console.error("Error al obtener el score:", scoreError)
-      debugLog("Score request failed, using fallback", scoreError)
       
-      // MOCK DATA FALLBACK - Commented out for production
-      /*
-      const simulatedScore = calculateSimulatedScore(answers)
-      setScore(simulatedScore)
-      setIsLoadingScore(false)
-      setCurrentStep("results-form")
-      
-      // Continue with report request using simulated score
-      setIsLoadingReport(true)
-      try {
-        const reportResponse = await fetch(WEBHOOK_1_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            answers,
-            lang: language,
-            score: simulatedScore.toString()
-          }),
-        })
+      setReportHTML(finalReportHTML)
+      setQuizResults({
+        score: calculatedScore,
+        reportHTML: finalReportHTML
+      })
+      setIsLoadingReport(false)
 
-        if (!reportResponse.ok) {
-          throw new Error(`Error HTTP: ${reportResponse.status}`)
-        }
-
-        const reportData = await reportResponse.json()
-        setReportHTML(reportData.reportHTML || "")
-        setQuizResults({
-          score: simulatedScore,
-          reportHTML: reportData.reportHTML || ""
-        })
-        setIsLoadingReport(false)
-        
-      } catch (reportError) {
-        console.error("Error al obtener el reporte con score simulado:", reportError)
-        const simulatedReportHTML = generateSimulatedReport(answers, simulatedScore)
-        setReportHTML(simulatedReportHTML)
-        setQuizResults({
-          score: simulatedScore,
-          reportHTML: simulatedReportHTML
-        })
-        setIsLoadingReport(false)
+      // THIRD CALL - Submit Lead with complete data (Webhook 2)
+      const submitData = {
+        leadInfo: {
+          firstName: leadData.firstName,
+          lastName: leadData.lastName,
+          phone: leadData.phone,
+          email: leadData.email,
+          acceptTerms: leadData.acceptTerms
+        },
+        score: calculatedScore,
+        reportHTML: finalReportHTML,
+        lang: language
       }
-      */
       
-      // For now, just show error state
+      debugLog("Starting final lead submission", { webhook: WEBHOOK_2_URL, data: submitData })
+      
+      const leadResponse = await fetch(WEBHOOK_2_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(submitData),
+      })
+      
+      if (!leadResponse.ok) {
+        console.error("Lead submission failed but continuing to confirmation")
+      } else {
+        const responseData = await leadResponse.json()
+        debugLog("Lead submission successful", responseData)
+      }
+      
+      // Navigate to confirmation
+      setCurrentStep("confirmation")
+      
+    } catch (error) {
+      console.error("Error in form submission process:", error)
+      debugLog("Form submission process failed", error)
+      
+      // Still navigate to confirmation even if there's an error
+      setCurrentStep("confirmation")
       setIsLoadingScore(false)
       setIsLoadingReport(false)
     }
-  }
-
-  const handleFormSubmit = async (leadData: any) => {
-    saveToStorage(STORAGE_KEYS.FORM_DATA, leadData)
-    
-    const submitData = {
-      leadInfo: {
-        firstName: leadData.firstName,
-        lastName: leadData.lastName,
-        phone: leadData.phone,
-        email: leadData.email,
-        acceptTerms: leadData.acceptTerms
-      },
-      score: quizResults?.score || score || 0,
-      reportHTML: quizResults?.reportHTML || reportHTML || "",
-      lang: language
-    }
-    
-    debugLog("Starting form submission", { webhook: WEBHOOK_2_URL, data: submitData })
-    
-    // Immediately navigate to confirmation
-    setCurrentStep("confirmation")
-    // Run API call in background
-    fetch(WEBHOOK_2_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(submitData),
-    })
-      .then(async (response) => {
-        debugLog("Form submission response", { 
-          status: response.status, 
-          ok: response.ok 
-        })
-        if (!response.ok) {
-          throw new Error(`Error HTTP: ${response.status}`)
-        }
-        const responseData = await response.json()
-        debugLog("Form submission successful", responseData)
-        // Optionally update state/UI here if needed
-      })
-      .catch((error) => {
-        console.error("Error al enviar formulario:", error)
-        debugLog("Form submission failed", error)
-        // Optionally update state/UI here if needed
-      })
   }
 
   const handleResetQuiz = () => {
@@ -482,21 +403,18 @@ export default function HomePage() {
             </motion.div>
           )}
           
-          {currentStep === "results-form" && (
+          {currentStep === "lead-form" && (
             <motion.div
-              key="results-form"
+              key="lead-form"
               initial={{ opacity: 0, x: 100 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -100 }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
             >
-              <ResultsAndForm
-                score={score}
-                reportHTML={reportHTML}
+              <LeadForm
                 onSubmit={handleFormSubmit}
                 onReset={handleResetQuiz}
-                isLoadingScore={isLoadingScore}
-                isLoadingReport={isLoadingReport}
+                isLoading={isLoadingScore || isLoadingReport}
               />
             </motion.div>
           )}
@@ -513,6 +431,9 @@ export default function HomePage() {
                 onOpenModal={() => setIsModalOpen(true)} 
                 onReset={handleResetQuiz} 
                 reportHTML={quizResults?.reportHTML || reportHTML || ""}
+                score={quizResults?.score || score || 0}
+                isLoadingScore={isLoadingScore}
+                isLoadingReport={isLoadingReport}
               />
             </motion.div>
           )}
